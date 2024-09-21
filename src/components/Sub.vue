@@ -6,9 +6,7 @@ export default {
   setup() {
     const isShowDone: any = ref(false)
     const items: any = ref([])
-    const getPics = async () => {
-      items.value = []
-
+    const getData = async (): Promise<Array<any>> => {
       const uri = window.location.search.substring(1); 
       const params = new URLSearchParams(uri);
 
@@ -23,7 +21,7 @@ export default {
           'workType': 'MANAGER',
           'keyword': '',
           'page': '0',
-          'limit': '30',
+          'limit': '100',
           'statuses': '',
           'operatorIds': ''
         },
@@ -47,9 +45,20 @@ export default {
           'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
         }
       })
-      const allData: Array<any> = response.data.items
-      const onDoingList: Array<any> = allData.filter((e) => e.itemStatus === 'DELETE_REQUEST' || e.itemStatus === 'WORK_IN_PROGRESS')
-      const uniq = [...new Set(onDoingList.map((e) => e.setNum))];
+
+      return response.data.items
+    }
+    const getPics = async () => {
+      items.value = []
+     
+      const allData: Array<any> = await getData()
+      const doneList: Array<any> = allData.filter((e) =>
+        e.itemStatus === 'DELETE_REQUEST' ||
+        e.itemStatus === 'WORK_IN_PROGRESS' ||
+        e.itemStatus === 'WORK_COMPLETE' ||
+        e.itemStatus === "WORK_BEFORE"
+      )
+      const uniq = [...new Set(doneList.map((e) => e.setNum))]
       let setNum = 0;
       for (const data of allData) {
         if (setNum != data.setNum) {
@@ -61,15 +70,35 @@ export default {
         }
       }
     }
+    const getChange = async () => {
+      const allData: Array<any> = await getData()
+      const doneList: Array<any> = allData.filter((e) =>
+        e.itemStatus === 'DELETE_REQUEST' ||
+        e.itemStatus === 'WORK_IN_PROGRESS' ||
+        e.itemStatus === 'WORK_COMPLETE' ||
+        e.itemStatus === "WORK_BEFORE"
+      )
+      const uniq = [...new Set(doneList.map((e) => e.setNum))]
+      for (const iq of uniq) {
+        const doneIdx = items.value.findIndex((e) => e.setNum === iq)
+        if (doneIdx !== -1) {
+          items.value.splice(doneIdx, 1)
+        }
+      }
+    }
     return {
       isShowDone,
       items,
+      getData,
       getPics,
+      getChange,
     }
   },
   beforeMount() {
+    this.getPics()
+  
     setInterval(()=> {
-      this.getPics()
+      this.getChange()
 		}, 5000)
 },
 };
@@ -77,13 +106,19 @@ export default {
 <template>
   <div>
     <div>
-      <input type="checkbox" id="checkbox" v-model="isShowDone" />
+      <input type="checkbox" id="checkbox" v-model="isShowDone" @change="getPics()" />
       <label for="checkbox"> Show nhhững hình đã được chọn</label>
     </div>
     <div class="grid grid-cols-4 gap-2">
       
       <div v-for="(item, index) in items" :key="index">
         {{ item.setNum }}
+        <label
+          v-if="item.itemStatus === 'DELETE_REQUEST' ||
+          item.itemStatus === 'WORK_IN_PROGRESS' ||
+          item.itemStatus === 'WORK_COMPLETE' ||
+          item.itemStatus === 'WORK_BEFORE'
+        "> đã được chọn</label> 
         <img :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" width="500" height="500" >
       </div>
     </div>
