@@ -104,13 +104,12 @@ export default {
 };
 </script>
 <template>
-  <div>
+  <div class="m-4">
     <div>
       <input type="checkbox" id="checkbox" v-model="isShowDone" @change="getPics()" />
       <label for="checkbox"> Show nhhững hình đã được chọn</label>
     </div>
     <div class="grid grid-cols-4 gap-2">
-      
       <div v-for="(item, index) in items" :key="index">
         {{ item.setNum }}
         <label
