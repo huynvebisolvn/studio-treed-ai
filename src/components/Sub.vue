@@ -52,33 +52,37 @@ export default {
       items.value = []
      
       const allData: Array<any> = await getData()
-      const doneList: Array<any> = allData.filter((e) =>
-        e.itemStatus === 'DELETE_REQUEST' ||
-        e.itemStatus === 'WORK_IN_PROGRESS' ||
-        e.itemStatus === 'WORK_COMPLETE'
-      )
-      const uniq = [...new Set(doneList.map((e) => e.setNum))]
-      let setNum = 0;
+      const doneList: Array<any> = allData.filter((e) => e?.operatedDate)
+      const uniq = [...new Set(doneList.map((e) => e?.setNum))]
+      let setNum = 0
+      let tempItem = []
       for (const data of allData) {
         if (setNum != data.setNum) {
           const doneIdx = uniq.findIndex((e) => e === data.setNum)
           if (isShowDone.value || doneIdx === -1) {
-            items.value.push(data)
+            tempItem.push(data)
             setNum = data.setNum
           }
         }
       }
+
+      let after = []
+      for (let i = tempItem.length - 1 ; i >= 0; i--) {
+          if (tempItem[i]?.setNum !== tempItem[i-1]?.setNum + 1) {
+              after.push(tempItem[i])
+              break
+          }
+          after.push(tempItem[i])
+      }
+
+      items.value = after.reverse()
     }
     const getChange = async () => {
       const allData: Array<any> = await getData()
-      const doneList: Array<any> = allData.filter((e) =>
-        e.itemStatus === 'DELETE_REQUEST' ||
-        e.itemStatus === 'WORK_IN_PROGRESS' ||
-        e.itemStatus === 'WORK_COMPLETE'
-      )
-      const uniq = [...new Set(doneList.map((e) => e.setNum))]
+      const doneList: Array<any> = allData.filter((e) => e.item?.operatedDate)
+      const uniq = [...new Set(doneList.map((e) => e?.setNum))]
       for (const iq of uniq) {
-        const doneIdx = items.value.findIndex((e) => e.setNum === iq)
+        const doneIdx = items.value.findIndex((e) => e?.setNum === iq)
         if (doneIdx !== -1) {
           items.value.splice(doneIdx, 1)
         }
@@ -99,7 +103,7 @@ export default {
       if (!this.isShowDone) {
         this.getChange()
       }
-		}, 5000)
+		}, 7000)
 },
 };
 </script>
@@ -111,12 +115,7 @@ export default {
     </div>
     <div class="grid grid-cols-4 gap-2">
       <div v-for="(item, index) in items" :key="index">
-        {{ item.setNum }}
-        <label
-          v-if="item.itemStatus === 'DELETE_REQUEST' ||
-          item.itemStatus === 'WORK_IN_PROGRESS' ||
-          item.itemStatus === 'WORK_COMPLETE'
-        "> đã được chọn</label> 
+        {{ item.setNum }} - {{ item.operatedDate }}
         <img :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" width="500" height="500" >
       </div>
     </div>
