@@ -4,7 +4,6 @@ import { ref } from "vue";
 export default {
   components: { axios },
   setup() {
-    const isShowDone: any = ref(false)
     const items: any = ref([])
     const getData = async (): Promise<Array<any>> => {
       const uri = window.location.search.substring(1); 
@@ -22,7 +21,7 @@ export default {
           'keyword': '',
           'page': '0',
           'limit': '999999999',
-          'statuses': '',
+          'statuses': 'WORK_BEFORE',
           'operatorIds': ''
         },
         headers: {
@@ -54,18 +53,21 @@ export default {
       const allData: Array<any> = await getData()
       const doneList: Array<any> = allData.filter((e) => e?.operatedDate)
       const uniq = [...new Set(doneList.map((e) => e?.setNum))]
+
+      // get first item as new set
       let setNum = 0
       let tempItem = []
       for (const data of allData) {
         if (setNum != data.setNum) {
           const doneIdx = uniq.findIndex((e) => e === data.setNum)
-          if (isShowDone.value || doneIdx === -1) {
+          if (doneIdx === -1) {
             tempItem.push(data)
             setNum = data.setNum
           }
         }
       }
 
+      // control not change status
       let after = []
       for (let i = tempItem.length - 1 ; i >= 0; i--) {
           if (tempItem[i]?.setNum !== tempItem[i-1]?.setNum + 1) {
@@ -79,17 +81,37 @@ export default {
     }
     const getChange = async () => {
       const allData: Array<any> = await getData()
-      const doneList: Array<any> = allData.filter((e) => e.item?.operatedDate)
+      const doneList: Array<any> = allData.filter((e) => e?.operatedDate)
       const uniq = [...new Set(doneList.map((e) => e?.setNum))]
-      for (const iq of uniq) {
-        const doneIdx = items.value.findIndex((e) => e?.setNum === iq)
-        if (doneIdx !== -1) {
-          items.value.splice(doneIdx, 1)
+
+      //  get first item as new set
+      let setNum = 0
+      let tempItem = []
+      for (const data of allData) {
+        if (setNum != data.setNum) {
+          const doneIdx = uniq.findIndex((e) => e === data.setNum)
+          if (doneIdx === -1) {
+            tempItem.push(data)
+            setNum = data.setNum
+          }
         }
+      }
+
+      // find new id to remove
+      let setNumRemove = []
+      for (const item of items.value) {
+        const doneIdx = tempItem.findIndex((e) => e?.setNum === item.setNum)
+        if (doneIdx === -1) {
+          setNumRemove.push(item.setNum)
+        }
+      }
+
+      for (const rmNum of setNumRemove) {
+        const removeIdx = items.value.findIndex((e) => e?.setNum === rmNum)
+        items.value.splice(removeIdx, 1)
       }
     }
     return {
-      isShowDone,
       items,
       getData,
       getPics,
@@ -100,19 +122,13 @@ export default {
     this.getPics()
   
     setInterval(()=> {
-      if (!this.isShowDone) {
-        this.getChange()
-      }
+      this.getChange()
 		}, 7000)
 },
 };
 </script>
 <template>
   <div class="m-4">
-    <div>
-      <input type="checkbox" id="checkbox" v-model="isShowDone" @change="getPics()" />
-      <label for="checkbox"> Show nhhững hình đã được chọn</label>
-    </div>
     <div class="grid grid-cols-4 gap-2">
       <div v-for="(item, index) in items" :key="index">
         {{ item.setNum }} - {{ item.operatedDate }}
