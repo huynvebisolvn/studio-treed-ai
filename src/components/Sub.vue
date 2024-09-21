@@ -21,7 +21,7 @@ export default {
           'workType': 'MANAGER',
           'keyword': '',
           'page': '0',
-          'limit': '100',
+          'limit': '999999999',
           'statuses': '',
           'operatorIds': ''
         },
