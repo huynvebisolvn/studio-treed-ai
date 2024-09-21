@@ -55,8 +55,7 @@ export default {
       const doneList: Array<any> = allData.filter((e) =>
         e.itemStatus === 'DELETE_REQUEST' ||
         e.itemStatus === 'WORK_IN_PROGRESS' ||
-        e.itemStatus === 'WORK_COMPLETE' ||
-        e.itemStatus === "WORK_BEFORE"
+        e.itemStatus === 'WORK_COMPLETE'
       )
       const uniq = [...new Set(doneList.map((e) => e.setNum))]
       let setNum = 0;
@@ -75,8 +74,7 @@ export default {
       const doneList: Array<any> = allData.filter((e) =>
         e.itemStatus === 'DELETE_REQUEST' ||
         e.itemStatus === 'WORK_IN_PROGRESS' ||
-        e.itemStatus === 'WORK_COMPLETE' ||
-        e.itemStatus === "WORK_BEFORE"
+        e.itemStatus === 'WORK_COMPLETE'
       )
       const uniq = [...new Set(doneList.map((e) => e.setNum))]
       for (const iq of uniq) {
@@ -118,8 +116,7 @@ export default {
         <label
           v-if="item.itemStatus === 'DELETE_REQUEST' ||
           item.itemStatus === 'WORK_IN_PROGRESS' ||
-          item.itemStatus === 'WORK_COMPLETE' ||
-          item.itemStatus === 'WORK_BEFORE'
+          item.itemStatus === 'WORK_COMPLETE'
         "> đã được chọn</label> 
         <img :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" width="500" height="500" >
       </div>
