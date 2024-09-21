@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import Evidence from "./components/Evidence.vue"
+import Sub from "./components/Sub.vue"
 
 </script>
 <template>
   <div>
-    <Evidence />
+    <Sub />
   </div>
 </template>
