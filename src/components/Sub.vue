@@ -131,7 +131,7 @@ export default {
   <div class="m-4">
     <div class="grid grid-cols-4 gap-2">
       <div v-for="(item, index) in items" :key="index">
-        {{ item.setNum }} - {{ item.operatedDate }}
+        {{ item.setNum }}
         <img :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" width="500" height="500" >
       </div>
     </div>
