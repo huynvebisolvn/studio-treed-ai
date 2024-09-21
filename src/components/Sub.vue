@@ -98,7 +98,7 @@ export default {
     this.getPics()
   
     setInterval(()=> {
-      if (!this.isShowDone.value) {
+      if (!this.isShowDone) {
         this.getChange()
       }
 		}, 5000)
