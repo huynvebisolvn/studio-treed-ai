@@ -123,7 +123,7 @@ export default {
   
     setInterval(()=> {
       this.getChange()
-		}, 7000)
+		}, 5000)
 },
 };
 </script>
