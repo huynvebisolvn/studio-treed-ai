@@ -47,6 +47,40 @@ export default {
 
       return response.data.items
     }
+    const deleteRequest = async (itemId: number) => {
+      const uri = window.location.search.substring(1); 
+      const params = new URLSearchParams(uri);
+
+      const authorization = params.get("authorization")
+      const taskId = params.get("taskId")
+
+      const response = await axios.post(
+        `https://studio.treed.ai/api/workspace/item/${itemId}/execute/delete`,
+        {
+          'workType': 'OPERATOR'
+        },
+        {
+          headers: {
+            'accept-language': 'en-US,en;q=0.9,vi-VN;q=0.8,vi;q=0.7,fr-FR;q=0.6,fr;q=0.5',
+            'access-control-allow-origin': '*',
+            'access-control-expose-headers': 'Authorization,Content-Disposition,Content-Type',
+            'authorization': `${authorization}`,
+            'cookie': 'modalType=update; modalClosed=false;',
+            'dnt': '1',
+            'origin': 'https://studio.treed.ai',
+            'priority': 'u=1, i',
+            'referer': `https://studio.treed.ai/workspace/${taskId}?workType=OPERATOR`,
+            'sec-ch-ua': '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+          }
+        }
+      );
+    }
     const getPics = async () => {
       const allData: Array<any> = await getData()
 
@@ -106,12 +140,22 @@ export default {
         }
       }
     }
+    const hasTask = async (_setNum: Number) => {
+      if (confirm('Bấm OK hoặc bấm ENTER để lấy set ' + _setNum + '?')) {
+        const listItems = items.value.filter((e) => e.setNum === _setNum)
+        for (const item of listItems) {
+          await deleteRequest(item.itemId)
+        }
+      }
+    }
     return {
       items,
       getData,
+      deleteRequest,
       getPics,
       setData,
       getChange,
+      hasTask,
     }
   },
   beforeMount() {
@@ -127,7 +171,7 @@ export default {
   <div class="m-4">
     <div class="grid grid-cols-4 gap-2">
       <template v-for="(item, index) in items" :key="index">
-        <div v-if="item.isShow">
+        <div v-if="item.isShow" @click="hasTask(item.setNum)">
           <label>{{ item.setNum }}</label>
           <img :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" width="500" height="500" >
         </div>
