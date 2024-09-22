@@ -48,92 +48,90 @@ export default {
       return response.data.items
     }
     const getPics = async () => {
-      items.value = []
-     
       const allData: Array<any> = await getData()
-      const doneList: Array<any> = allData.filter((e) => e?.operatedDate)
-      const uniq = [...new Set(doneList.map((e) => e?.setNum))]
 
-      // get first item as new set
+      // count pic on a set
+      const countSetNum = allData.filter((e) => e.setNum === allData.slice(-1).pop()?.setNum).length
+
+      // check item not a set (10)
       let setNum = 0
-      let tempItem = []
       for (const data of allData) {
         if (setNum != data.setNum) {
-          const doneIdx = uniq.findIndex((e) => e === data.setNum)
-          if (doneIdx === -1) {
-            tempItem.push(data)
-            setNum = data.setNum
-          }
+          data.isShow = true
+          setNum = data.setNum
+        }
+        const countCurrent = allData.filter((e) => e.setNum === data.setNum).length
+        if (countCurrent != countSetNum) {
+          data.isShow = false
         }
       }
-
+      
       // control not change status
+      const allIsShow = allData.filter((e) => e.isShow)
+      const uniq = [...new Set(allIsShow.map((e) => e?.setNum))]
       let after = []
-      for (let i = tempItem.length - 1 ; i >= 0; i--) {
-          if (tempItem[i]?.setNum !== tempItem[i-1]?.setNum + 1) {
-              after.push(tempItem[i])
+      for (let i = uniq.length - 1 ; i >= 0; i--) {
+          if (uniq[i] !== uniq[i-1] + 1) {
+              after.push(uniq[i])
               break
           }
-          after.push(tempItem[i])
+          after.push(uniq[i])
       }
 
-      items.value = after.reverse()
-    }
-    const getChange = async () => {
-      const allData: Array<any> = await getData()
-      const doneList: Array<any> = allData.filter((e) => e?.operatedDate)
-      const uniq = [...new Set(doneList.map((e) => e?.setNum))]
-
-      //  get first item as new set
-      let setNum = 0
-      let tempItem = []
       for (const data of allData) {
-        if (setNum != data.setNum) {
-          const doneIdx = uniq.findIndex((e) => e === data.setNum)
-          if (doneIdx === -1) {
-            tempItem.push(data)
-            setNum = data.setNum
+        if (data.isShow) {
+          const idx = after.findIndex((e) => e === data.setNum)
+          if (idx === -1) {
+            data.isShow = false
           }
         }
       }
 
-      // find new id to remove
-      let setNumRemove = []
-      for (const item of items.value) {
-        const doneIdx = tempItem.findIndex((e) => e?.setNum === item.setNum)
-        if (doneIdx === -1) {
-          setNumRemove.push(item.setNum)
-        }
-      }
+      return allData
+    }
+    const setData = async () => {
+      const allPics: Array<any> = await getPics()
+      items.value = allPics
+    }
+    const getChange = async () => {
+      const allPics: Array<any> = await getPics()
+      const allPicsShow = allPics.filter((e) => e.isShow)
+      const uniq = [...new Set(allPicsShow.map((e) => e?.setNum))]
 
-      for (const rmNum of setNumRemove) {
-        const removeIdx = items.value.findIndex((e) => e?.setNum === rmNum)
-        items.value.splice(removeIdx, 1)
+      // find new id to remove
+      for (const item of items.value) {
+        const doneIdx = uniq.findIndex((e) => e === item.setNum)
+        if (doneIdx === -1) {
+          item.isShow = false
+        }
       }
     }
     return {
       items,
       getData,
       getPics,
+      setData,
       getChange,
     }
   },
   beforeMount() {
-    this.getPics()
+    this.setData()
   
     setInterval(()=> {
       this.getChange()
-		}, 5000)
+    }, 5000)
 },
 };
 </script>
 <template>
   <div class="m-4">
     <div class="grid grid-cols-4 gap-2">
-      <div v-for="(item, index) in items" :key="index">
-        {{ item.setNum }}
-        <img :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" width="500" height="500" >
-      </div>
+      <template v-for="(item, index) in items" :key="index">
+        <div v-if="item.isShow">
+          <label>{{ item.setNum }}</label>
+          <img :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" width="500" height="500" >
+        </div>
+      </template>
     </div>
   </div>
 </template>
