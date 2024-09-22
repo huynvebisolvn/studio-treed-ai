@@ -142,7 +142,7 @@ export default {
       }
     }
     const getChildItem = async (_setNum: number) => {
-      clearChildItem()
+      childItems.value = []
       childItems.value = items.value.filter((e) => e.setNum === _setNum)
     }
     const clearChildItem = async () => {
@@ -184,7 +184,7 @@ export default {
       <template v-for="(item, index) in items" :key="index">
         <div v-if="item.isShow">
           <label>{{ item.setNum }}</label>
-          <img :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" width="500" height="500" @click="getChildItem(item.setNum)" >
+          <img :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" @click="getChildItem(item.setNum)" >
         </div>
       </template>
     </div>
@@ -194,12 +194,12 @@ export default {
           <div class="grid grid-cols-4 gap-2 m-4">
             <template v-for="(childitem, childindex) in childItems" :key="childindex">
               <div>
-                <label>{{ childitem.setNum }} - {{ childitem.itemId }}</label>
-                <img :key="childindex" :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${childitem.filePath}`" width="500" height="500" >
+                <label>{{ childitem.setNum }} - {{ childindex + 1 }} - {{ childitem.itemId }}</label>
+                <img :key="childindex" :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${childitem.filePath}`" >
               </div>
             </template>
           </div>
-          <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+          <div class="flex items-center p-2 md:p-5 rounded-b dark:border-gray-600">
               <button data-modal-hide="default-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" @click="hasTask(childItems[0].setNum)">Lấy Hết</button>
               <button data-modal-hide="default-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" @click="clearChildItem()">Bỏ Qua</button>
           </div>
