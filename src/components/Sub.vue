@@ -92,19 +92,12 @@ export default {
     }
     const funGetPics = async () => {
       const allTaskWorkBefore: Array<any> = await funGetTaskByUser('')
-      // count pic on a set
-      const countSetNum = allTaskWorkBefore.filter((e) => e.setNum === allTaskWorkBefore.slice(-1).pop()?.setNum).length
 
-      // check item not a set (10)
       let setNum = 0
       for (const data of allTaskWorkBefore) {
         if (setNum != data.setNum) {
           data.isShow = true
           setNum = data.setNum
-        }
-        const countCurrent = allTaskWorkBefore.filter((e) => e.setNum === data.setNum).length
-        if (countCurrent != countSetNum) {
-          data.isShow = false
         }
       }
       items.value = allTaskWorkBefore
@@ -205,7 +198,6 @@ export default {
 </script>
 <template>
   <div class="m-4">
-
     <button
       v-if="loading"
       type="button" class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700">
