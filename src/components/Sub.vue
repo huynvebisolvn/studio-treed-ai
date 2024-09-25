@@ -183,7 +183,13 @@ export default {
     <div class="grid grid-cols-4 gap-2">
       <template v-for="(item, index) in items" :key="index">
         <div v-if="item.isShow">
-          <label>{{ item.setNum }}</label>
+          <button
+            type="button"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700"
+            @click="hasTask(item.setNum)"
+          >
+            Lấy Hết {{ item.setNum }}
+          </button>
           <img :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" @click="getChildItem(item.setNum)" >
         </div>
       </template>
