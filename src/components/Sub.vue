@@ -9,6 +9,7 @@ export default {
     const users: any = ref([])
     const usersTask: any = ref([])
     const items: any = ref([])
+    const wishList: any = ref([])
     const childItems: any = ref([])
     const funTimer = (ms: number) => new Promise((res) => setTimeout(res, ms))
     const funGetParams = () => {
@@ -18,7 +19,7 @@ export default {
       params.value.projectId = urlParams.get("projectId")
       params.value.taskId = urlParams.get("taskId")
     }
-    const funGetUsers = async (): Promise<Array<any>> => {
+    const funGetUsers = async () => {
       const response = await axios.get(`https://studio.treed.ai/api/dashboard/status/people/${params.value.taskId}/WORK`, {
         headers: {
           'accept': 'application/json, text/plain, */*',
@@ -76,12 +77,12 @@ export default {
       })
       return response.data.items
     }
-    const funGetUsersTask = async (sleep: number): Promise<Array<any>> => {
+    const funGetUsersTask = async (sleep: number) => {
       for (const user of users.value) {
         const tasks = await funGetTaskByUser(user.id)
         const setNums = [...new Set(tasks.map((e) => e?.setNum))]
         for (const num of setNums) {
-          const idx = usersTask.value.findIndex(e => e === num)
+          const idx = usersTask.value.findIndex((e:any) => e === num)
           if (idx === -1) {
             usersTask.value.push(num)
           }
@@ -104,7 +105,7 @@ export default {
     }
     const funHiddenPics = async () => {
       for (const item of items.value) {
-        const idx = usersTask.value.findIndex(e => e === item.setNum)
+        const idx = usersTask.value.findIndex((e:any) => e === item.setNum)
         if (idx !== -1) {
           item.isShow = false
         }
@@ -141,10 +142,10 @@ export default {
     }
     const funcCatchTask = async () => {
       if (confirm('Bấm OK hoặc bấm ENTER để lấy đầu tiên!')) {
-        // await funcNextRequest()
+        await funcNextRequest()
       }
     }
-    const funMain = async (_setNum: Number) => {
+    const funMain = async () => {
       await funGetUsers()
       await funGetPics()
 
@@ -158,9 +159,29 @@ export default {
         }
       }, 1000)
     }
+    const funcCheckOnWishList = (_setNum: number) => {
+      const idx = wishList.value.findIndex((e: number) => e === _setNum)
+      return idx !== -1
+    }
+    const funcAddWishList = (_setNum: number) => {
+      wishList.value.push(_setNum)
+    }
+    const funcRemoveWishList = (_setNum: number) => {
+      const idx = wishList.value.findIndex((e: number) => e === _setNum)
+      wishList.value.splice(idx, 1);
+    }
+    const funcItemWishList = async () => {
+      if (loading.value) return
+      const onShowItems = items.value.filter((e: any) => e.isShow === true)
+      const idx = wishList.value.findIndex((e: number) => e === onShowItems[0].setNum)
+      if (idx !== -1) {
+        await funcNextRequest()
+        funcRemoveWishList(onShowItems[0].setNum)
+      }
+    }
     const getChildItem = async (_setNum: number) => {
       childItems.value = []
-      childItems.value = items.value.filter((e) => e.setNum === _setNum)
+      childItems.value = items.value.filter((e:any) => e.setNum === _setNum)
     }
     const clearChildItem = async () => {
       childItems.value = []
@@ -171,7 +192,9 @@ export default {
       users,
       usersTask,
       items,
+      wishList,
       childItems,
+      funcItemWishList,
       funMain,
       funTimer,
       funGetUsers,
@@ -182,6 +205,9 @@ export default {
       funHiddenPics,
       funcCatchTask,
       funGetParams,
+      funcCheckOnWishList,
+      funcAddWishList,
+      funcRemoveWishList,
       getChildItem,
       clearChildItem,
     }
@@ -192,7 +218,12 @@ export default {
 
     setInterval(()=> {
       this.funHiddenPics()
-    }, 2000)
+    }, 1000)
+
+    // check to get wish list
+    setInterval(()=> {
+      this.funcItemWishList()
+    }, 1000)
 },
 };
 </script>
@@ -208,16 +239,30 @@ export default {
       type="button" class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700" @click="funcCatchTask()">
       Lấy Set Đầu
     </button>
+    {{ wishList }}
 
-    <div class="grid grid-cols-4 gap-2">
+    <div class="mt-4 grid grid-cols-4 gap-2">
       <template v-for="(item, index) in items" :key="index">
         <div v-if="item.isShow">
-          {{ item.setNum }}
+          <button
+            v-if="funcCheckOnWishList(item.setNum)"
+            type="button" class="px-5 mb-1 text-white bg-green-700 hover:bg-green-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-green-600 dark:hover:bg-green-700"
+            @click="funcRemoveWishList(item.setNum)"
+          >
+            {{ item.setNum }}
+          </button>
+          <button
+            v-else
+            type="button" class="px-5 mb-1 text-white bg-gray-700 hover:bg-gray-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-gray-600 dark:hover:bg-gray-700"
+            @click="funcAddWishList(item.setNum)"
+          >
+            {{ item.setNum }}
+          </button>
           <img :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" @click="getChildItem(item.setNum)" >
         </div>
       </template>
     </div>
-    <div v-if="childItems.length > 0" tabindex="-1" aria-hidden="true" class="fixed top-[5%] right-0 left-[10%] z-50 justify-center w-[80%] h-[80%]">
+    <div v-if="childItems.length > 0" tabindex="-1" aria-hidden="true" class="fixed top-[10%] right-0 left-[10%] z-50 justify-center w-[80%]">
       <div class="relative p-4 w-full h-full">
         <div class="relative rounded-lg shadow border-4 bg-gray-300">
           <div class="grid grid-cols-3 gap-2 m-4">
