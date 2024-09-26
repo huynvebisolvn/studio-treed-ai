@@ -19,6 +19,18 @@ export default {
       params.value.projectId = urlParams.get("projectId")
       params.value.taskId = urlParams.get("taskId")
     }
+    const funGetWishParams = () => {
+      const uri = window.location.search.substring(1); 
+      const urlParams = new URLSearchParams(uri);
+      const wishs = urlParams.get("wish")?.split(',')
+      let rs = []
+      if (wishs) {
+        for (const wish of wishs) {
+          rs.push(Number(wish))
+        }
+      }
+      return rs
+    }
     const funGetUsers = async () => {
       const response = await axios.get(`https://studio.treed.ai/api/dashboard/status/people/${params.value.taskId}/WORK`, {
         headers: {
@@ -140,14 +152,12 @@ export default {
         }
       );
     }
-    const funcCatchTask = async () => {
-      if (confirm('Bấm OK hoặc bấm ENTER để lấy đầu tiên!')) {
-        await funcNextRequest()
-      }
-    }
     const funMain = async () => {
       await funGetUsers()
       await funGetPics()
+
+      // get url wish
+      wishList.value = funGetWishParams()
 
       // refresh users new task
       setTimeout(async function () {
@@ -203,8 +213,8 @@ export default {
       funcNextRequest,
       funGetPics,
       funHiddenPics,
-      funcCatchTask,
       funGetParams,
+      funGetWishParams,
       funcCheckOnWishList,
       funcAddWishList,
       funcRemoveWishList,
@@ -236,8 +246,8 @@ export default {
     </button>
     <button
       v-else
-      type="button" class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700" @click="funcCatchTask()">
-      Lấy Set Đầu
+      type="button" class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700">
+      Want task
     </button>
     {{ wishList }}
 
