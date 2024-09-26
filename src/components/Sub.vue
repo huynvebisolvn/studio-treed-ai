@@ -22,7 +22,7 @@ export default {
     const funGetWishParams = () => {
       const uri = window.location.search.substring(1); 
       const urlParams = new URLSearchParams(uri);
-      const wishs = urlParams.get("wish")?.split(',')
+      const wishs = urlParams.get("set")?.split(',')
       let rs = []
       if (wishs) {
         for (const wish of wishs) {
@@ -247,7 +247,7 @@ export default {
     <button
       v-else
       type="button" class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700">
-      Want task
+      Want set
     </button>
     {{ wishList }}
 
