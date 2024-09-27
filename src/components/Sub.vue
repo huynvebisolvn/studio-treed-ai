@@ -185,8 +185,8 @@ export default {
       const onShowItems = items.value.filter((e: any) => e.isShow === true)
       const idx = wishList.value.findIndex((e: number) => e === onShowItems[0].setNum)
       if (idx !== -1) {
-        await funcNextRequest()
         funcRemoveWishList(onShowItems[0].setNum)
+        await funcNextRequest()
       }
     }
     const getChildItem = async (_setNum: number) => {
