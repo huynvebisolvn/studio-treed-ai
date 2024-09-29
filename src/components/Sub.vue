@@ -113,7 +113,7 @@ export default {
           setNum = data.setNum
         }
       }
-      items.value = allTaskWorkBefore
+      items.value = allTaskWorkBefore.filter((e) => !e.operatedDate)
     }
     const funHiddenPics = async () => {
       for (const item of items.value) {
