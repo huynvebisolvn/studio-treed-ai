@@ -5,7 +5,8 @@ export default {
   components: { axios },
   setup() {
     const params = ref({ authorization: '', projectId: '', taskId: '' })
-    const loading: any = ref(false)
+    const loadPicture: any = ref(false)
+    const waiting: any = ref(true)
     const users: any = ref([])
     const usersTask: any = ref([])
     const items: any = ref([])
@@ -166,6 +167,9 @@ export default {
         // refresh users new task
         funGetUsersTask(user.id)
       }
+
+      await funTimer(2000)
+      waiting.value = false
     }
     const funcCheckOnWishList = (_setNum: number) => {
       const idx = wishList.value.findIndex((e: number) => e === _setNum)
@@ -195,7 +199,8 @@ export default {
     }
     return {
       params,
-      loading,
+      loadPicture,
+      waiting,
       users,
       usersTask,
       items,
@@ -238,9 +243,9 @@ export default {
   <div class="m-4">
     <button
       type="button" class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700"
-      @click="loading = !loading"
+      @click="loadPicture = !loadPicture"
       >
-      Load Hình
+      {{ waiting ? 'Waiting' : 'Load Hình' }}
     </button>
     {{ wishList }}
 
@@ -261,7 +266,7 @@ export default {
           >
             {{ item.setNum }}
           </button>
-          <img v-if="loading" :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" @click="getChildItem(item.setNum)" >
+          <img v-if="loadPicture" :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" @click="getChildItem(item.setNum)" >
         </div>
       </template>
     </div>
