@@ -265,7 +265,7 @@ export default {
         </div>
       </template>
     </div>
-    <div v-if="childItems.length > 0" tabindex="-1" aria-hidden="true" class="fixed top-[10%] right-0 left-[10%] z-50 justify-center w-[80%]">
+    <div v-if="childItems.length > 0" tabindex="-1" aria-hidden="true" class="fixed top-0 right-0 left-[10%] z-50 justify-center w-[80%]">
       <div class="relative p-4 w-full h-full">
         <div class="relative rounded-lg shadow border-4 bg-gray-300">
           <div class="grid grid-cols-4 gap-2 m-4">
