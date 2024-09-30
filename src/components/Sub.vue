@@ -100,7 +100,7 @@ export default {
           }
         }
         // sleep time
-        await funTimer(sleep)
+        // await funTimer(sleep)
       }
     }
     const funGetPics = async () => {
