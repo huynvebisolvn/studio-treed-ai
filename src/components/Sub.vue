@@ -5,7 +5,7 @@ export default {
   components: { axios },
   setup() {
     const params = ref({ authorization: '', projectId: '', taskId: '' })
-    const loading: any = ref(true)
+    const loading: any = ref(false)
     const users: any = ref([])
     const usersTask: any = ref([])
     const items: any = ref([])
@@ -89,18 +89,21 @@ export default {
       })
       return response.data.items
     }
-    const funGetUsersTask = async (sleep: number) => {
-      for (const user of users.value) {
-        const tasks = await funGetTaskByUser(user.id)
-        const setNums = [...new Set(tasks.map((e) => e?.setNum))]
-        for (const num of setNums) {
-          const idx = usersTask.value.findIndex((e:any) => e === num)
-          if (idx === -1) {
-            usersTask.value.push(num)
+    const funGetUsersTask = async (userId: string) => {
+      while(true) {
+        try {
+          const tasks = await funGetTaskByUser(userId)
+          const setNums = [...new Set(tasks.map((e) => e?.setNum))]
+          for (const num of setNums) {
+            const idx = usersTask.value.findIndex((e:any) => e === num)
+            if (idx === -1) {
+              usersTask.value.push(num)
+            }
           }
+          await funTimer(2000)
+        } catch (error) {
+          await funTimer(2000)
         }
-        // sleep time
-        // await funTimer(sleep)
       }
     }
     const funGetPics = async () => {
@@ -159,15 +162,10 @@ export default {
       // get url wish
       wishList.value = funGetWishParams()
 
-      // refresh users new task
-      setTimeout(async function () {
-        let _sleep = 0
-        while(true) {
-          await funGetUsersTask(_sleep)
-          _sleep = 500
-          loading.value = false
-        }
-      }, 1000)
+      for (const user of users.value) {
+        // refresh users new task
+        funGetUsersTask(user.id)
+      }
     }
     const funcCheckOnWishList = (_setNum: number) => {
       const idx = wishList.value.findIndex((e: number) => e === _setNum)
@@ -181,7 +179,6 @@ export default {
       wishList.value.splice(idx, 1);
     }
     const funcItemWishList = async () => {
-      if (loading.value) return
       const onShowItems = items.value.filter((e: any) => e.isShow === true)
       const idx = wishList.value.findIndex((e: number) => e === onShowItems[0].setNum)
       if (idx !== -1) {
@@ -240,14 +237,10 @@ export default {
 <template>
   <div class="m-4">
     <button
-      v-if="loading"
-      type="button" class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700">
-      Loading...
-    </button>
-    <button
-      v-else
-      type="button" class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700">
-      Want set
+      type="button" class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700"
+      @click="loading = !loading"
+      >
+      Load Hình
     </button>
     {{ wishList }}
 
@@ -268,14 +261,14 @@ export default {
           >
             {{ item.setNum }}
           </button>
-          <img :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" @click="getChildItem(item.setNum)" >
+          <img v-if="loading" :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" @click="getChildItem(item.setNum)" >
         </div>
       </template>
     </div>
     <div v-if="childItems.length > 0" tabindex="-1" aria-hidden="true" class="fixed top-[10%] right-0 left-[10%] z-50 justify-center w-[80%]">
       <div class="relative p-4 w-full h-full">
         <div class="relative rounded-lg shadow border-4 bg-gray-300">
-          <div class="grid grid-cols-3 gap-2 m-4">
+          <div class="grid grid-cols-4 gap-2 m-4">
             <template v-for="(childitem, childindex) in childItems" :key="childindex">
               <div>
                 <label>{{ childitem.setNum }} - {{ childindex + 1 }} - {{ childitem.itemId }}</label>
