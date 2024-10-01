@@ -101,9 +101,9 @@ export default {
               usersTask.value.push(num)
             }
           }
-          await funTimer(2000)
+          await funTimer(1000)
         } catch (error) {
-          await funTimer(2000)
+          await funTimer(1000)
         }
       }
     }
