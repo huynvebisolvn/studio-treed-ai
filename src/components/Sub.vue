@@ -109,14 +109,22 @@ export default {
     }
     const funGetPics = async () => {
       const allTaskWorkBefore: Array<any> = await funGetTaskByUser('')
-
-      let setNum = 0
-      for (const data of allTaskWorkBefore) {
-        if (setNum != data.setNum) {
+      if (allTaskWorkBefore && allTaskWorkBefore[0].setNum) {
+        // has setNum
+        let setNum = 0
+        for (const data of allTaskWorkBefore) {
+          if (setNum != data.setNum) {
+            data.isShow = true
+            setNum = data.setNum
+          }
+        }
+      } else {
+        // don't has setNum
+        for (const data of allTaskWorkBefore) {
           data.isShow = true
-          setNum = data.setNum
         }
       }
+
       items.value = allTaskWorkBefore.filter((e) => !e.operatedDate)
     }
     const funHiddenPics = async () => {
@@ -171,28 +179,45 @@ export default {
       await funTimer(2000)
       waiting.value = false
     }
-    const funcCheckOnWishList = (_setNum: number) => {
-      const idx = wishList.value.findIndex((e: number) => e === _setNum)
+    const funcCheckOnWishList = (item: any) => {
+      let key = item.setNum
+      if (!key) key = item.itemId
+
+      const idx = wishList.value.findIndex((e: number) => e === key)
       return idx !== -1
     }
-    const funcAddWishList = (_setNum: number) => {
-      wishList.value.push(_setNum)
+    const funcAddWishList = (item: any) => {
+      let key = item.setNum
+      if (!key) key = item.itemId
+
+      wishList.value.push(key)
     }
-    const funcRemoveWishList = (_setNum: number) => {
-      const idx = wishList.value.findIndex((e: number) => e === _setNum)
+    const funcRemoveWishList = (item: any) => {
+      let key = item.setNum
+      if (!key) key = item.itemId
+
+      const idx = wishList.value.findIndex((e: number) => e === key)
       wishList.value.splice(idx, 1);
     }
     const funcItemWishList = async () => {
       const onShowItems = items.value.filter((e: any) => e.isShow === true)
-      const idx = wishList.value.findIndex((e: number) => e === onShowItems[0].setNum)
+
+      let key = onShowItems[0].setNum
+      if (!key) key = onShowItems[0].itemId
+
+      const idx = wishList.value.findIndex((e: number) => e === key)
       if (idx !== -1) {
-        funcRemoveWishList(onShowItems[0].setNum)
+        funcRemoveWishList(onShowItems[0])
         await funcNextRequest()
       }
     }
-    const getChildItem = async (_setNum: number) => {
+    const getChildItem = async (item: any) => {
       childItems.value = []
-      childItems.value = items.value.filter((e:any) => e.setNum === _setNum)
+
+      let key = item.setNum
+      if (key) {
+        childItems.value = items.value.filter((e:any) => e.setNum === key)
+      }
     }
     const clearChildItem = async () => {
       childItems.value = []
@@ -253,20 +278,20 @@ export default {
       <template v-for="(item, index) in items" :key="index">
         <div v-if="item.isShow">
           <button
-            v-if="funcCheckOnWishList(item.setNum)"
+            v-if="funcCheckOnWishList(item)"
             type="button" class="px-5 mb-1 text-white bg-green-700 hover:bg-green-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-green-600 dark:hover:bg-green-700"
-            @click="funcRemoveWishList(item.setNum)"
+            @click="funcRemoveWishList(item)"
           >
-            {{ item.setNum }}
+            {{ item.setNum ? item.setNum : item.itemId }}
           </button>
           <button
             v-else
             type="button" class="px-5 mb-1 text-white bg-gray-700 hover:bg-gray-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-gray-600 dark:hover:bg-gray-700"
-            @click="funcAddWishList(item.setNum)"
+            @click="funcAddWishList(item)"
           >
-            {{ item.setNum }}
+            {{ item.setNum ? item.setNum : item.itemId }}
           </button>
-          <img v-if="loadPicture" :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" @click="getChildItem(item.setNum)" >
+          <img v-if="loadPicture" :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`" @click="getChildItem(item)" >
         </div>
       </template>
     </div>
