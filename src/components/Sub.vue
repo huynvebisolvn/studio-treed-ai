@@ -27,7 +27,7 @@ export default {
       let rs = []
       if (wishs) {
         for (const wish of wishs) {
-          rs.push(Number(wish))
+          if (Number(wish)) rs.push(Number(wish))
         }
       }
       return rs
@@ -109,7 +109,7 @@ export default {
     }
     const funGetPics = async () => {
       const allTaskWorkBefore: Array<any> = await funGetTaskByUser('')
-      if (allTaskWorkBefore && allTaskWorkBefore[0].setNum) {
+      if (allTaskWorkBefore && allTaskWorkBefore[0] && allTaskWorkBefore[0].setNum) {
         // has setNum
         let setNum = 0
         for (const data of allTaskWorkBefore) {
@@ -202,8 +202,11 @@ export default {
     const funcItemWishList = async () => {
       const onShowItems = items.value.filter((e: any) => e.isShow === true)
 
-      let key = onShowItems[0].setNum
-      if (!key) key = onShowItems[0].itemId
+      let key = -1
+      if (onShowItems && onShowItems[0]) {
+        key = onShowItems[0].setNum
+        if (!key) key = onShowItems[0].itemId
+      }
 
       const idx = wishList.value.findIndex((e: number) => e === key)
       if (idx !== -1) {
