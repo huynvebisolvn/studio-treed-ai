@@ -12,6 +12,7 @@ export default {
     const items: any = ref([])
     const wishList: any = ref([])
     const childItems: any = ref([])
+    const isError = ref(false)
     const funTimer = (ms: number) => new Promise((res) => setTimeout(res, ms))
     const funGetParams = () => {
       const uri = window.location.search.substring(1); 
@@ -55,6 +56,8 @@ export default {
         }
       });
       users.value = response.data.operators
+      // error
+      if (response.data.code === 'TK0001' ) isError.value = true
     }
     const funGetTaskByUser = async (userId: string): Promise<Array<any>> => {
       const response = await axios.get('https://studio.treed.ai/api/workspace/items', {
@@ -88,6 +91,8 @@ export default {
           'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
         }
       })
+      // error
+      if (response.data.code === 'TK0001' ) isError.value = true
       return response.data.items
     }
     const funGetUsersTask = async (userId: string) => {
@@ -248,6 +253,7 @@ export default {
       items,
       wishList,
       childItems,
+      isError,
       funcItemWishList,
       funMain,
       funTimer,
@@ -289,8 +295,9 @@ export default {
       >
       {{ waiting ? 'Waiting' : 'Load Hình' }}
     </button>
-    {{ wishList }}
+    {{ wishList }} <br />
 
+    <label v-if="isError" class="text-3xl text-red-500">Hết hạn rồi, đăng nhập lại!</label>
     <div class="mt-4 grid grid-cols-4 gap-2">
       <template v-for="(item, index) in items" :key="index">
         <div v-if="item.isShow">
