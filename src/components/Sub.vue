@@ -57,7 +57,7 @@ export default {
       });
       users.value = response.data.operators
       // error
-      if (response.data.code === 'TK0001' ) isError.value = true
+      if (response.data.code.includes("TK") ) isError.value = true
     }
     const funGetTaskByUser = async (userId: string): Promise<Array<any>> => {
       const response = await axios.get('https://studio.treed.ai/api/workspace/items', {
@@ -92,7 +92,7 @@ export default {
         }
       })
       // error
-      if (response.data.code === 'TK0001' ) isError.value = true
+      if (response.data.code.includes("TK") ) isError.value = true
       return response.data.items
     }
     const funGetUsersTask = async (userId: string) => {
