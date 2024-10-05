@@ -94,11 +94,22 @@ export default {
       while(true) {
         try {
           const tasks = await funGetTaskByUser(userId)
-          const setNums = [...new Set(tasks.map((e) => e?.setNum))]
-          for (const num of setNums) {
-            const idx = usersTask.value.findIndex((e:any) => e === num)
-            if (idx === -1) {
-              usersTask.value.push(num)
+          if (tasks && tasks[0] && tasks[0].setNum) {
+            // setNum
+            const setNums = [...new Set(tasks.map((e) => e?.setNum))]
+            for (const num of setNums) {
+              const idx = usersTask.value.findIndex((e:any) => e === num)
+              if (idx === -1) {
+                usersTask.value.push(num)
+              }
+            }
+          } else {
+            // itemId
+            for (const task of tasks) {
+              const idx = usersTask.value.findIndex((e:any) => e === task.itemId)
+              if (idx === -1) {
+                usersTask.value.push(task.itemId)
+              }
             }
           }
           await funTimer(1000)
@@ -129,7 +140,10 @@ export default {
     }
     const funHiddenPics = async () => {
       for (const item of items.value) {
-        const idx = usersTask.value.findIndex((e:any) => e === item.setNum)
+        let key = item.setNum
+        if (!key) key = item.itemId
+
+        const idx = usersTask.value.findIndex((e:any) => e === key)
         if (idx !== -1) {
           item.isShow = false
         }
