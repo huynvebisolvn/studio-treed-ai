@@ -300,7 +300,7 @@ export default {
       type="button" class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700"
       @click="loadPicture = !loadPicture"
       >
-      {{ waiting ? 'Waiting' : 'Load Hình' }}
+      {{ waiting ? 'Waiting' : 'Picture' }}
     </button>
     <input class="ml-2 border-2 border-rose-500" v-model="myUsersName" placeholder="Nhập tên user" /> {{ usersTaskMap.get(myUsersName)  }}
     <p class="break-all text-teal-700">{{ wishList }}</p>
