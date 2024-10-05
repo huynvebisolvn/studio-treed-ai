@@ -9,6 +9,8 @@ export default {
     const waiting: any = ref(true)
     const users: any = ref([])
     const usersTask: any = ref([])
+    const myUsersName = ref('')
+    const usersTaskMap: any = ref(new Map())
     const items: any = ref([])
     const wishList: any = ref([])
     const childItems: any = ref([])
@@ -95,7 +97,7 @@ export default {
       if (response.data?.code?.includes("TK") ) isError.value = true
       return response.data.items
     }
-    const funGetUsersTask = async (userId: string) => {
+    const funGetUsersTask = async (userId: string, userName: string) => {
       while(true) {
         try {
           const tasks = await funGetTaskByUser(userId)
@@ -108,6 +110,7 @@ export default {
                 usersTask.value.push(num)
               }
             }
+            usersTaskMap.value.set(userName, setNums)
           } else {
             // itemId
             for (const task of tasks) {
@@ -116,6 +119,8 @@ export default {
                 usersTask.value.push(task.itemId)
               }
             }
+            const setItemId = [...new Set(tasks.map((e) => e?.itemId))]
+            usersTaskMap.value.set(userName, setItemId)
           }
           await funTimer(1000)
         } catch (error) {
@@ -192,7 +197,7 @@ export default {
 
       for (const user of users.value) {
         // refresh users new task
-        funGetUsersTask(user.id)
+        funGetUsersTask(user.id, user.name)
       }
 
       await funTimer(2000)
@@ -250,6 +255,8 @@ export default {
       waiting,
       users,
       usersTask,
+      myUsersName,
+      usersTaskMap,
       items,
       wishList,
       childItems,
@@ -295,22 +302,22 @@ export default {
       >
       {{ waiting ? 'Waiting' : 'Load Hình' }}
     </button>
-    {{ wishList }} <br />
-
+    <input class="ml-2 border-2 border-rose-500" v-model="myUsersName" placeholder="Nhập tên user" /> {{ usersTaskMap.get(myUsersName)  }}
+    <p class="break-all text-teal-700">{{ wishList }}</p>
     <label v-if="isError" class="text-3xl text-red-500">Hết hạn rồi, đăng nhập lại!</label>
-    <div class="mt-4 grid grid-cols-4 gap-2">
+    <div class="mt-4 grid grid-cols-4 gap-1">
       <template v-for="(item, index) in items" :key="index">
         <div v-if="item.isShow">
           <button
             v-if="funcCheckOnWishList(item)"
-            type="button" class="px-5 mb-1 text-white bg-green-700 hover:bg-green-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-green-600 dark:hover:bg-green-700"
+            type="button" class="px-3 mb-1 text-white bg-green-700 hover:bg-green-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-green-600 dark:hover:bg-green-700"
             @click="funcRemoveWishList(item)"
           >
             {{ item.setNum ? item.setNum : item.itemId }}
           </button>
           <button
             v-else
-            type="button" class="px-5 mb-1 text-white bg-gray-700 hover:bg-gray-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-gray-600 dark:hover:bg-gray-700"
+            type="button" class="px-3 mb-1 text-white bg-gray-700 hover:bg-gray-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-gray-600 dark:hover:bg-gray-700"
             @click="funcAddWishList(item)"
           >
             {{ item.setNum ? item.setNum : item.itemId }}
