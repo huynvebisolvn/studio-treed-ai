@@ -13,6 +13,7 @@ export default {
     const usersTaskMap: any = ref(new Map())
     const items: any = ref([])
     const wishList: any = ref([])
+    const wishListInput: any = ref('')
     const childItems: any = ref([])
     const isError = ref(false)
     const funTimer = (ms: number) => new Promise((res) => setTimeout(res, ms))
@@ -24,16 +25,14 @@ export default {
       params.value.taskId = urlParams.get("taskId")
     }
     const funGetWishParams = () => {
-      const uri = window.location.search.substring(1); 
-      const urlParams = new URLSearchParams(uri);
-      const wishs = urlParams.get("set")?.split(',')
+      const wishs = wishListInput.value?.split(',')
       let rs = []
       if (wishs) {
         for (const wish of wishs) {
           if (Number(wish)) rs.push(Number(wish))
         }
       }
-      return rs
+      wishList.value = rs
     }
     const funGetUsers = async () => {
       const response = await axios.get(`https://studio.treed.ai/api/dashboard/status/people/${params.value.taskId}/WORK`, {
@@ -193,9 +192,6 @@ export default {
       await funGetUsers()
       await funGetPics()
 
-      // get url wish
-      wishList.value = funGetWishParams()
-
       for (const user of users.value) {
         // refresh users new task
         funGetUsersTask(user.id, user.name)
@@ -263,6 +259,7 @@ export default {
       usersTaskMap,
       items,
       wishList,
+      wishListInput,
       childItems,
       isError,
       funcItemWishList,
@@ -306,6 +303,7 @@ export default {
       >
       {{ waiting ? 'Waiting' : 'Picture' }}
     </button>
+    <input class="ml-2 border-2 border-sky-500" v-model="wishListInput" placeholder="Nhập wish list" @change="funGetWishParams"/>
     <input class="ml-2 border-2 border-rose-500" v-model="myUsersName" placeholder="Nhập tên user" /> {{ usersTaskMap.get(myUsersName)  }}
     <p class="break-all text-teal-700">{{ wishList }}</p>
     <label v-if="isError" class="text-3xl text-red-500">Hết hạn rồi, đăng nhập lại!</label>
