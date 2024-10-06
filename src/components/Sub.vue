@@ -24,13 +24,20 @@ export default {
       params.value.projectId = urlParams.get("projectId")
       params.value.taskId = urlParams.get("taskId")
 
-      const _myUsersName = getCookie('myUsersName')
-      const _wishList = getCookie('wishList')
-      // set UsersName
-      myUsersName.value = _myUsersName
-      // set wishList
-      wishListInput.value = _wishList
-      funGetWishParams()
+      const _taskId = getCookie('taskId')
+      if (!_taskId || params.value.taskId === _taskId) {
+        const _myUsersName = getCookie('myUsersName')
+        const _wishList = getCookie('wishList')
+        // set UsersName
+        myUsersName.value = _myUsersName
+        // set wishList
+        wishListInput.value = _wishList
+        funGetWishParams()
+      } else {
+        setCookie('myUsersName', '')
+        setCookie('wishList', '')
+      }
+      setCookie('taskId', params.value.taskId)
     }
     const funGetWishParams = () => {
       const wishs = wishListInput.value?.split(',')
