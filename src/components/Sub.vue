@@ -224,6 +224,9 @@ export default {
       wishList.value.splice(idx, 1);
     }
     const funcItemWishList = async () => {
+      // skip when waiting
+      if (waiting.value) return
+
       const onShowItems = items.value.filter((e: any) => e.isShow === true)
 
       let key = -1
