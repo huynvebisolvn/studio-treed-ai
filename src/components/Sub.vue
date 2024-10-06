@@ -23,6 +23,14 @@ export default {
       params.value.authorization = urlParams.get("authorization")
       params.value.projectId = urlParams.get("projectId")
       params.value.taskId = urlParams.get("taskId")
+
+      const _myUsersName = getCookie('myUsersName')
+      const _wishList = getCookie('wishList')
+      // set UsersName
+      myUsersName.value = _myUsersName
+      // set wishList
+      wishListInput.value = _wishList
+      funGetWishParams()
     }
     const funGetWishParams = () => {
       const wishs = wishListInput.value?.split(',')
@@ -33,6 +41,7 @@ export default {
         }
       }
       wishList.value = rs
+      setCookie('wishList', rs.join(','))
     }
     const funGetUsers = async () => {
       const response = await axios.get(`https://studio.treed.ai/api/dashboard/status/people/${params.value.taskId}/WORK`, {
@@ -60,7 +69,7 @@ export default {
       // error
       if (response.data?.code?.includes("TK") ) isError.value = true
     }
-    const funGetTaskByUser = async (userId: string): Promise<Array<any>> => {
+    const funGetTaskByUser = async (userId: string, statuses: string): Promise<Array<any>> => {
       const response = await axios.get('https://studio.treed.ai/api/workspace/items', {
         params: {
           'projectId': `${params.value.projectId}`,
@@ -69,7 +78,7 @@ export default {
           'keyword': '',
           'page': '0',
           'limit': '999999999',
-          'statuses': 'WORK_BEFORE',
+          'statuses': `${statuses}`,
           'operatorIds': `${userId}`
         },
         headers: {
@@ -99,7 +108,7 @@ export default {
     const funGetUsersTask = async (userId: string, userName: string) => {
       while(true) {
         try {
-          const tasks = await funGetTaskByUser(userId)
+          const tasks = await funGetTaskByUser(userId, '')
           if (tasks && tasks[0] && tasks[0].setNum) {
             // setNum
             const setNums = [...new Set(tasks.map((e) => e?.setNum))]
@@ -128,7 +137,7 @@ export default {
       }
     }
     const funGetPics = async () => {
-      const allTaskWorkBefore: Array<any> = await funGetTaskByUser('')
+      const allTaskWorkBefore: Array<any> = await funGetTaskByUser('', 'WORK_BEFORE')
       if (allTaskWorkBefore && allTaskWorkBefore[0] && allTaskWorkBefore[0].setNum) {
         // has setNum
         let setNum = 0
@@ -238,7 +247,7 @@ export default {
         await funcNextRequest()
       }
     }
-    const getChildItem = async (item: any) => {
+    const getChildItem = (item: any) => {
       childItems.value = []
 
       let key = item.setNum
@@ -246,9 +255,17 @@ export default {
         childItems.value = items.value.filter((e:any) => e.setNum === key)
       }
     }
-    const clearChildItem = async () => {
+    const clearChildItem = () => {
       childItems.value = []
     }
+    const setCookie = (cname: string, cvalue: string) => {
+      document.cookie = cname + '=' + encodeURIComponent(cvalue) + '; path=/';
+    }
+    const getCookie = (cname: string) => {
+			const regex = new RegExp('(?:^|; )' + encodeURIComponent(cname) + '=([^;]*)');
+			const match = document.cookie.match(regex);
+			return match ? decodeURIComponent(match[1]) : '';
+		}
     return {
       params,
       loadPicture,
@@ -278,6 +295,8 @@ export default {
       funcRemoveWishList,
       getChildItem,
       clearChildItem,
+      setCookie,
+      getCookie,
     }
   },
   beforeMount() {
@@ -303,9 +322,10 @@ export default {
       >
       {{ waiting ? 'Waiting' : 'Picture' }}
     </button>
-    <input class="ml-2 border-2 border-sky-500" v-model="wishListInput" placeholder="Nhập wish list" @change="funGetWishParams"/>
-    <input class="ml-2 border-2 border-rose-500" v-model="myUsersName" placeholder="Nhập tên user" /> {{ usersTaskMap.get(myUsersName)  }}
-    <p class="break-all text-teal-700">{{ wishList }}</p>
+    <input class="ml-2 border-2 border-rose-500" v-model="myUsersName" placeholder="Nhập tên user" @change="setCookie('myUsersName', myUsersName)"/>
+    <input class="ml-2 border-2 border-teal-500" v-model="wishListInput" placeholder="Nhập wish list" @change="funGetWishParams"/>
+    <p class="break-all text-rose-500"> {{ usersTaskMap.get(myUsersName)  }}</p>
+    <p class="break-all text-teal-500">{{ wishList }}</p>
     <label v-if="isError" class="text-3xl text-red-500">Hết hạn rồi, đăng nhập lại!</label>
     <div class="mt-4 grid grid-cols-4 gap-1">
       <template v-for="(item, index) in items" :key="index">
