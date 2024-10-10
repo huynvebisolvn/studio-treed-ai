@@ -144,6 +144,7 @@ export default {
       }
     }
     const funGetPics = async () => {
+      waiting.value = true
       const allTaskWorkBefore: Array<any> = await funGetTaskByUser('', 'WORK_BEFORE')
       if (allTaskWorkBefore && allTaskWorkBefore[0] && allTaskWorkBefore[0].setNum) {
         // has setNum
@@ -162,6 +163,7 @@ export default {
       }
 
       items.value = allTaskWorkBefore.filter((e) => !e.operatedDate)
+      waiting.value = false
     }
     const funHiddenPics = async () => {
       for (const item of items.value) {
@@ -223,7 +225,12 @@ export default {
       const idx = wishList.value.findIndex((e: number) => e === key)
       return idx !== -1
     }
-    const funcAddWishList = (item: any) => {
+    const funcAddWishList = (index: number, item: any) => {
+      if (index === 0) {
+        if (!confirm('Chị có chắc chưaaa?')) {
+          return
+        }
+      }
       let key = item.setNum
       if (!key) key = item.itemId
 
@@ -311,6 +318,10 @@ export default {
     this.funMain()
 
     setInterval(()=> {
+      this.funGetPics()
+    }, 900000)
+
+    setInterval(()=> {
       this.funHiddenPics()
     }, 1000)
 
@@ -347,7 +358,7 @@ export default {
           <button
             v-else
             type="button" class="px-3 mb-1 text-white bg-gray-700 hover:bg-gray-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-gray-600 dark:hover:bg-gray-700"
-            @click="funcAddWishList(item)"
+            @click="funcAddWishList(index, item)"
           >
             {{ item.setNum ? item.setNum : item.itemId }}
           </button>
