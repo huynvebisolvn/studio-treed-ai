@@ -161,8 +161,8 @@ export default {
           data.isShow = true
         }
       }
-
-      items.value = allTaskWorkBefore.filter((e) => !e.operatedDate)
+      // allTaskWorkBefore.filter((e) => !e.operatedDate)
+      items.value = allTaskWorkBefore
       waiting.value = false
     }
     const funHiddenPics = async () => {
