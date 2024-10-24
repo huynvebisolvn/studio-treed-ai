@@ -137,9 +137,9 @@ export default {
             const setItemId = [...new Set(tasks.map((e) => e?.itemId))]
             usersTaskMap.value.set(userName, setItemId)
           }
-          await funTimer(1000)
+          await funTimer(2000)
         } catch (error) {
-          await funTimer(1000)
+          await funTimer(2000)
         }
       }
     }
