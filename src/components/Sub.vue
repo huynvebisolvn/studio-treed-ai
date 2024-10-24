@@ -244,21 +244,27 @@ export default {
       wishList.value.splice(idx, 1);
     }
     const funcItemWishList = async () => {
-      // skip when waiting
-      if (waiting.value) return
+      while(true) {
+        try {
+          // skip when waiting
+          if (waiting.value) return
+          const onShowItems = items.value.filter((e: any) => e.isShow === true)
+          let key = -1
+          if (onShowItems && onShowItems[0]) {
+            key = onShowItems[0].setNum
+            if (!key) key = onShowItems[0].itemId
+          }
 
-      const onShowItems = items.value.filter((e: any) => e.isShow === true)
+          const idx = wishList.value.findIndex((e: number) => e === key)
+          if (idx !== -1) {
+            funcRemoveWishList(onShowItems[0])
+            await funcNextRequest()
+          }
 
-      let key = -1
-      if (onShowItems && onShowItems[0]) {
-        key = onShowItems[0].setNum
-        if (!key) key = onShowItems[0].itemId
-      }
-
-      const idx = wishList.value.findIndex((e: number) => e === key)
-      if (idx !== -1) {
-        funcRemoveWishList(onShowItems[0])
-        await funcNextRequest()
+          await funTimer(500)
+        } catch (error) {
+          console.log(error)
+        }
       }
     }
     const getChildItem = (item: any) => {
@@ -326,9 +332,7 @@ export default {
     }, 1000)
 
     // check to get wish list
-    setInterval(()=> {
-      this.funcItemWishList()
-    }, 1000)
+    this.funcItemWishList()
 },
 };
 </script>
