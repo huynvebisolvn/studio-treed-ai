@@ -274,8 +274,12 @@ export default {
 
       const idx = wishList.value.findIndex((e: number) => e === key)
       if (idx !== -1) {
-        funcRemoveWishList(onShowItems[0])
+        const tempItem = JSON.parse(JSON.stringify(onShowItems[0]))
+        funcRemoveWishList(tempItem)
         await funcNextRequest()
+        setTimeout(function () {
+          funcAddWishList(99, tempItem)
+        }, 1)
       }
     }
     const getChildItem = (item: any) => {
