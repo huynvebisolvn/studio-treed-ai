@@ -279,7 +279,7 @@ export default {
         await funcNextRequest()
         setTimeout(function () {
           funcAddWishList(99, tempItem)
-        }, 1)
+        }, 2000)
       }
     }
     const getChildItem = (item: any) => {
