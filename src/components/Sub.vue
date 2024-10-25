@@ -221,7 +221,7 @@ export default {
           }
         }
       );
-      console.log(response.data)
+      console.log(response)
     }
     const funMain = async () => {
       await funGetUsers()
