@@ -39,22 +39,21 @@ export default {
       }
       setCookie('taskId', params.value.taskId)
 
-      const urlUser = urlParams.get("user")
-      if (urlUser) {
-        myUsersName.value = urlUser
-      }
-
-      const urlSet = urlParams.get("set")
-      if (urlSet) {
-        const wishs = urlSet.split(',')
-        let rs = []
-        for (const wish of wishs) {
-          if (Number(wish)) rs.push(Number(wish))
-        }
-        wishList.value = rs
-        wishListInput.value = rs
-        setCookie('wishList', rs.join(','))
-      }
+      // const urlUser = urlParams.get("user")
+      // if (urlUser) {
+      //   myUsersName.value = urlUser
+      // }
+      // const urlSet = urlParams.get("set")
+      // if (urlSet) {
+      //   const wishs = urlSet.split(',')
+      //   let rs = []
+      //   for (const wish of wishs) {
+      //     if (Number(wish)) rs.push(Number(wish))
+      //   }
+      //   wishList.value = rs
+      //   wishListInput.value = rs
+      //   setCookie('wishList', rs.join(','))
+      // }
     }
     const funGetWishParams = () => {
       const wishs = wishListInput.value?.split(',')
@@ -293,9 +292,9 @@ export default {
     const clearChildItem = () => {
       childItems.value = []
     }
-    const saveLink = () => {
-      window.location.href += `&set=${wishList.value}&user=${myUsersName.value}`
-    }
+    // const saveLink = () => {
+    //   window.location.href += `&set=${wishList.value}&user=${myUsersName.value}`
+    // }
     const setCookie = (cname: string, cvalue: string) => {
       document.cookie = cname + '=' + encodeURIComponent(cvalue) + '; path=/';
     }
@@ -333,7 +332,7 @@ export default {
       funcRemoveWishList,
       getChildItem,
       clearChildItem,
-      saveLink,
+      // saveLink,
       setCookie,
       getCookie,
     }
@@ -365,14 +364,8 @@ export default {
       >
       {{ waiting ? 'Waiting' : 'Picture' }}
     </button>
-    <input class="ml-2 border-2 border-rose-500" v-model="myUsersName" placeholder="Nhập tên user" @change="setCookie('myUsersName', myUsersName)"/>
-    <input class="ml-2 border-2 border-teal-500" v-model="wishListInput" placeholder="Nhập wish list" @change="funGetWishParams"/>
-    <button
-      type="button" class="ml-2 px-5 text-white bg-green-700 hover:bg-green-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-green-600 dark:hover:bg-green-700"
-      @click="saveLink"
-      >
-      Save
-    </button>
+    <input class="ml-2 border-2 border-rose-500" v-model="myUsersName" placeholder="Nhập tên user" @input="setCookie('myUsersName', myUsersName)"/>
+    <input class="ml-2 border-2 border-teal-500" v-model="wishListInput" placeholder="Nhập wish list" @input="funGetWishParams"/>
     <p class="break-all text-rose-500"> {{ usersTaskMap.get(myUsersName)  }}</p>
     <p class="break-all text-teal-500">{{ wishList }}</p>
     <label v-if="isError" class="text-3xl text-red-500">Hết hạn rồi, đăng nhập lại!</label>
