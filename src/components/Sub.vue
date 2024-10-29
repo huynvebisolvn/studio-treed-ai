@@ -273,8 +273,7 @@ export default {
 
       const idx = wishList.value.findIndex((e: number) => e === key)
       if (idx !== -1) {
-        const tempItem = JSON.parse(JSON.stringify(onShowItems[0]))
-        funcRemoveWishList(tempItem)
+        wishList.value.splice(idx, 1)
         await funcNextRequest()
       }
     }
