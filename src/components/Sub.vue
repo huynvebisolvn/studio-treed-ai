@@ -276,9 +276,6 @@ export default {
         const tempItem = JSON.parse(JSON.stringify(onShowItems[0]))
         funcRemoveWishList(tempItem)
         await funcNextRequest()
-        setTimeout(function () {
-          funcAddWishList(99, tempItem)
-        }, 1000)
       }
     }
     const getChildItem = (item: any) => {
