@@ -225,12 +225,7 @@ export default {
       const idx = wishList.value.findIndex((e: number) => e === key)
       return idx !== -1
     }
-    const funcAddWishList = (index: number, item: any) => {
-      if (index === 0) {
-        if (!confirm('Chị có chắc chưaaa?')) {
-          return
-        }
-      }
+    const funcAddWishList = (item: any) => {
       let key = item.setNum
       if (!key) key = item.itemId
 
@@ -357,7 +352,7 @@ export default {
           <button
             v-else
             type="button" class="px-3 mb-1 text-white bg-gray-700 hover:bg-gray-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-gray-600 dark:hover:bg-gray-700"
-            @click="funcAddWishList(index, item)"
+            @click="funcAddWishList(item)"
           >
             {{ item.setNum ? item.setNum : item.itemId }}
           </button>
@@ -368,7 +363,7 @@ export default {
     <div v-if="childItems.length > 0" tabindex="-1" aria-hidden="true" class="fixed top-0 right-0 left-[10%] z-50 justify-center w-[80%]">
       <div class="relative p-4 w-full h-full">
         <div class="relative rounded-lg shadow border-4 bg-gray-300">
-          <div class="grid grid-cols-4 gap-2 m-4">
+          <div class="grid grid-cols-4 gap-2 m-4 overflow-auto" style="height: 750px;">
             <template v-for="(childitem, childindex) in childItems" :key="childindex">
               <div>
                 <label>{{ childitem.setNum }} - {{ childindex + 1 }} - {{ childitem.itemId }}</label>
