@@ -38,22 +38,6 @@ export default {
         setCookie('wishList', '')
       }
       setCookie('taskId', params.value.taskId)
-
-      // const urlUser = urlParams.get("user")
-      // if (urlUser) {
-      //   myUsersName.value = urlUser
-      // }
-      // const urlSet = urlParams.get("set")
-      // if (urlSet) {
-      //   const wishs = urlSet.split(',')
-      //   let rs = []
-      //   for (const wish of wishs) {
-      //     if (Number(wish)) rs.push(Number(wish))
-      //   }
-      //   wishList.value = rs
-      //   wishListInput.value = rs
-      //   setCookie('wishList', rs.join(','))
-      // }
     }
     const funGetWishParams = () => {
       const wishs = wishListInput.value?.split(',')
@@ -263,12 +247,11 @@ export default {
       // skip when waiting
       if (waiting.value) return
 
-      const onShowItems = items.value.filter((e: any) => e.isShow === true)
-
+      const firstShowIdx = items.value.findIndex((e: any) => e.isShow === true)
       let key = -1
-      if (onShowItems && onShowItems[0]) {
-        key = onShowItems[0].setNum
-        if (!key) key = onShowItems[0].itemId
+      if (firstShowIdx !== -1) {
+        key = items.value[firstShowIdx].setNum
+        if (!key) key = items.value[firstShowIdx].itemId
       }
 
       const idx = wishList.value.findIndex((e: number) => e === key)
@@ -288,9 +271,6 @@ export default {
     const clearChildItem = () => {
       childItems.value = []
     }
-    // const saveLink = () => {
-    //   window.location.href += `&set=${wishList.value}&user=${myUsersName.value}`
-    // }
     const setCookie = (cname: string, cvalue: string) => {
       document.cookie = cname + '=' + encodeURIComponent(cvalue) + '; path=/';
     }
@@ -328,7 +308,6 @@ export default {
       funcRemoveWishList,
       getChildItem,
       clearChildItem,
-      // saveLink,
       setCookie,
       getCookie,
     }
