@@ -136,9 +136,9 @@ const funGetUsersTask = async (userId: string, userName: string) => {
         const setItemId = [...new Set(tasks.map((e) => e?.itemId))]
         usersTaskMap.value.set(userName, setItemId)
       }
-      await funTimer(2000)
+      await funTimer(3000)
     } catch (error) {
-      await funTimer(2000)
+      await funTimer(3000)
     }
   }
 }
@@ -244,7 +244,7 @@ const firstItem = computed(() => {
   return key
 })
 
-watch(firstItem, async () => {
+const onNext = async () => {
   // skip when waiting
   if (!waiting.value) {
     const idx = wishList.value.findIndex((e: number) => e === firstItem.value)
@@ -255,6 +255,14 @@ watch(firstItem, async () => {
       funcNextRequest()
     }
   }
+}
+
+watch(wishList, async () => {
+  await onNext()
+}, { deep: true })
+
+watch(firstItem, async () => {
+  await onNext()
 })
 
 watch(usersTask.value, () => {
