@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import axios from 'axios';
-import { ref, onMounted } from "vue";
+import { ref, onBeforeMount, onMounted } from "vue";
 
 const params = ref({ authorization: '', projectId: '', taskId: '' })
 const loadPicture: any = ref(false)
@@ -166,6 +166,8 @@ const funGetPics = async () => {
 }
 const funHiddenPics = async () => {
   for (const item of items.value) {
+    if (item.isShow === false) continue
+
     let key = item.setNum
     if (!key) key = item.itemId
 
@@ -204,18 +206,6 @@ const funcNextRequest = async () => {
     }
   );
   console.log(response)
-}
-const funMain = async () => {
-  await funGetUsers()
-  await funGetPics()
-
-  for (const user of users.value) {
-    // refresh users new task
-    funGetUsersTask(user.id, user.name)
-  }
-
-  await funTimer(2000)
-  waiting.value = false
 }
 const funcCheckOnWishList = (item: any) => {
   let key = item.setNum
@@ -274,22 +264,33 @@ const getCookie = (cname: string) => {
   return match ? decodeURIComponent(match[1]) : '';
 }
 
-onMounted(() => {
+
+onBeforeMount(() => {
   funGetParams()
-  funMain()
+})
 
-  setInterval(() => {
-    funGetPics()
-  }, 900000)
+onMounted(async () => {
+  // get first all user and task
+  await funGetUsers()
+  await funGetPics()
 
-  setInterval(() => {
-    funHiddenPics()
-  }, 1000)
+  for (const user of users.value) {
+    // refresh users new task
+    funGetUsersTask(user.id, user.name)
+  }
+
+  // load done
+  await funTimer(2000)
+  waiting.value = false
+
+  // hidden pics from user's task
+  setInterval(() => { funHiddenPics() }, 1000)
 
   // check to get wish list
-  setInterval(() => {
-    funcItemWishList()
-  }, 1000)
+  setInterval(() => { funcItemWishList() }, 1000)
+
+  // 15 minutes will reset task
+  setInterval(() => { funGetPics() }, 900000)
 })
 </script>
 
