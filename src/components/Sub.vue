@@ -128,7 +128,7 @@ const funGetUsersTask = async (userIds: Array<string>) => {
           wishList.value.splice(idx, 1)
           await funcNextRequest()
         }
-      }      
+      }
       await funTimer(2000)
     } catch (error) {}
   }
