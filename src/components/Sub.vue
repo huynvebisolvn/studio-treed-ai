@@ -130,7 +130,7 @@ const funGetUsersTask = async (userIds: Array<string>) => {
         }
       }
       await funTimer(2000)
-    } catch (error) {}
+    } catch (error) { }
   }
 }
 const funGetPics = async () => {
