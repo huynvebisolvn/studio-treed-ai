@@ -19,9 +19,9 @@ const funTimer = (ms: number) => new Promise((res) => setTimeout(res, ms))
 const funGetParams = () => {
   const uri = window.location.search.substring(1);
   const urlParams = new URLSearchParams(uri);
-  params.value.authorization = urlParams.get("authorization")
-  params.value.projectId = urlParams.get("projectId")
-  params.value.taskId = urlParams.get("taskId")
+  params.value.authorization = String(urlParams.get("authorization"))
+  params.value.projectId = String(urlParams.get("projectId"))
+  params.value.taskId = String(urlParams.get("taskId"))
 
   const _taskId = getCookie('taskId')
   if (!_taskId || params.value.taskId === _taskId) {
