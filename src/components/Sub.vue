@@ -1,14 +1,10 @@
 <script lang="ts" setup>
 import axios from 'axios';
-import { ref, onBeforeMount, onMounted, watch, computed } from "vue";
+import { ref, onBeforeMount, onMounted } from "vue";
 
 const params = ref({ authorization: '', projectId: '', taskId: '' })
 const loadPicture: any = ref(false)
-const waiting: any = ref(true)
-const users: any = ref([])
-const usersTask: any = ref([])
-const myUsersName = ref('')
-const usersTaskMap: any = ref(new Map())
+const nextIdx = ref()
 const items: any = ref([])
 const wishList: any = ref([])
 const wishListInput: any = ref('')
@@ -25,15 +21,11 @@ const funGetParams = () => {
 
   const _taskId = getCookie('taskId')
   if (!_taskId || params.value.taskId === _taskId) {
-    const _myUsersName = getCookie('myUsersName')
     const _wishList = getCookie('wishList')
-    // set UsersName
-    myUsersName.value = _myUsersName
     // set wishList
     wishListInput.value = _wishList
     funGetWishParams()
   } else {
-    setCookie('myUsersName', '')
     setCookie('wishList', '')
   }
   setCookie('taskId', params.value.taskId)
@@ -71,11 +63,12 @@ const funGetUsers = async () => {
       'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
     }
   });
-  users.value = response.data.operators
   // error
   if (response.data?.code?.includes("TK")) isError.value = true
+  return response.data.operators
 }
-const funGetTaskByUser = async (userId: string, statuses: string): Promise<Array<any>> => {
+const funGetTaskByUser = async (userIds?: Array<string>): Promise<Array<any>> => {
+  const idsParam = userIds ? userIds.join(',') : ''
   const response = await axios.get('https://studio.treed.ai/api/workspace/items', {
     params: {
       'projectId': `${params.value.projectId}`,
@@ -84,8 +77,8 @@ const funGetTaskByUser = async (userId: string, statuses: string): Promise<Array
       'keyword': '',
       'page': '0',
       'limit': '999999999',
-      'statuses': `${statuses}`,
-      'operatorIds': `${userId}`
+      'statuses': '',
+      'operatorIds': `${idsParam}`
     },
     headers: {
       'accept': 'application/json, text/plain, */*',
@@ -111,39 +104,35 @@ const funGetTaskByUser = async (userId: string, statuses: string): Promise<Array
   if (response.data?.code?.includes("TK")) isError.value = true
   return response.data.items
 }
-const funGetUsersTask = async (userId: string, userName: string) => {
+const funGetUsersTask = async (userIds: Array<string>) => {
   while (true) {
     try {
-      const tasks = await funGetTaskByUser(userId, '')
+      const tasks = await funGetTaskByUser(userIds)
+      let idx = undefined
       if (tasks && tasks[0] && tasks[0].setNum) {
         // setNum
-        const setNums = [...new Set(tasks.map((e) => e?.setNum))]
-        for (const num of setNums) {
-          const idx = usersTask.value.findIndex((e: any) => e === num)
-          if (idx === -1) {
-            usersTask.value.push(num)
-          }
-        }
-        usersTaskMap.value.set(userName, setNums)
+        const maxKey = Math.max(...tasks.map(o => o.setNum))
+        idx = items.value.findIndex(e => e.setNum === maxKey)
       } else {
         // itemId
-        for (const task of tasks) {
-          const idx = usersTask.value.findIndex((e: any) => e === task.itemId)
-          if (idx === -1) {
-            usersTask.value.push(task.itemId)
-          }
-        }
-        const setItemId = [...new Set(tasks.map((e) => e?.itemId))]
-        usersTaskMap.value.set(userName, setItemId)
+        const maxKey = Math.max(...tasks.map(o => o.itemId))
+        idx = items.value.findIndex(e => e.itemId === maxKey)
       }
-      await funTimer(3000)
-    } catch (error) {
-      await funTimer(3000)
-    }
+      if (idx) {
+        // check next item on wish
+        nextIdx.value = idx + 1
+        const isOnWish = funcCheckOnWishList(items.value[idx + 1])
+        if (isOnWish) {
+          wishList.value.splice(idx, 1)
+          await funcNextRequest()
+        }
+      }      
+      await funTimer(2000)
+    } catch (error) {}
   }
 }
 const funGetPics = async () => {
-  const allTaskWorkBefore: Array<any> = await funGetTaskByUser('', 'WORK_BEFORE')
+  const allTaskWorkBefore: Array<any> = await funGetTaskByUser(undefined)
   if (allTaskWorkBefore && allTaskWorkBefore[0] && allTaskWorkBefore[0].setNum) {
     // has setNum
     let setNum = 0
@@ -232,70 +221,17 @@ const getCookie = (cname: string) => {
   return match ? decodeURIComponent(match[1]) : '';
 }
 
-const firstItem = computed(() => {
-  const firstShowIdx = items.value.findIndex((e: any) => e.isShow === true)
-  let key = -1
-  if (firstShowIdx !== -1) {
-    key = items.value[firstShowIdx].setNum
-    if (!key) key = items.value[firstShowIdx].itemId
-  }
-  return key
-})
-
-const onNext = async () => {
-  // skip when waiting
-  if (!waiting.value) {
-    console.log(firstItem.value)
-
-    const idx = wishList.value.findIndex((e: number) => e === firstItem.value)
-    if (idx !== -1) {
-      wishList.value.splice(idx, 1)
-
-      await funTimer(500)
-      funcNextRequest()
-    }
-  }
-}
-
-watch(wishList, async () => {
-  await onNext()
-}, { deep: true })
-
-watch(firstItem, async () => {
-  await onNext()
-})
-
-watch(usersTask.value, () => {
-  for (const item of items.value) {
-    if (item.isShow === false) continue
-
-    let key = item.setNum
-    if (!key) key = item.itemId
-
-    const idx = usersTask.value.findIndex((e: any) => e === key)
-    if (idx !== -1) {
-      item.isShow = false
-    }
-  }
-})
-
 onBeforeMount(() => {
   funGetParams()
 })
 
 onMounted(async () => {
   // get first all user and task
-  await funGetUsers()
+  const users = await funGetUsers()
   await funGetPics()
 
-  for (const user of users.value) {
-    // refresh users new task
-    funGetUsersTask(user.id, user.name)
-  }
-
-  // wating for first load done
-  await funTimer(10000)
-  waiting.value = false
+  const ids = [...new Set(users.map((e) => e.id))]
+  funGetUsersTask(ids)
 })
 </script>
 
@@ -304,18 +240,16 @@ onMounted(async () => {
     <button type="button"
       class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700"
       @click="loadPicture = !loadPicture">
-      {{ waiting ? 'Waiting' : 'Picture' }}
+      Picture
     </button>
-    <input class="ml-2 border-2 border-rose-500" v-model="myUsersName" placeholder="Nhập tên user"
-      @input="setCookie('myUsersName', myUsersName)" />
     <input class="ml-2 border-2 border-teal-500" v-model="wishListInput" placeholder="Nhập wish list"
       @input="funGetWishParams" />
-    <p class="break-all text-rose-500"> {{ usersTaskMap.get(myUsersName) }}</p>
+    <p class="break-all text-rose-500">  </p>
     <p class="break-all text-teal-500">{{ wishList }}</p>
     <label v-if="isError" class="text-3xl text-red-500">Hết hạn rồi, đăng nhập lại!</label>
     <div class="mt-4 grid grid-cols-4 gap-1">
       <template v-for="(item, index) in items" :key="index">
-        <div v-if="item.isShow">
+        <div v-if="item.isShow && index >= nextIdx">
           <button v-if="funcCheckOnWishList(item)" type="button"
             class="px-3 mb-1 text-white bg-green-700 hover:bg-green-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-green-600 dark:hover:bg-green-700"
             @click="funcRemoveWishList(item)">
