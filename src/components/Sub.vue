@@ -296,9 +296,6 @@ onMounted(async () => {
   // wating for first load done
   await funTimer(10000)
   waiting.value = false
-
-  // 15 minutes will reset task
-  setInterval(() => { funGetPics() }, 900000)
 })
 </script>
 
