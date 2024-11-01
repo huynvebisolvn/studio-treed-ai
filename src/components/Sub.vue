@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import axios from 'axios';
-import { ref, onBeforeMount, onMounted } from "vue";
+import { ref, onBeforeMount, onMounted, watch, computed } from "vue";
 
 const params = ref({ authorization: '', projectId: '', taskId: '' })
 const loadPicture: any = ref(false)
@@ -164,19 +164,6 @@ const funGetPics = async () => {
   items.value = allTaskWorkBefore
   waiting.value = false
 }
-const funHiddenPics = async () => {
-  for (const item of items.value) {
-    if (item.isShow === false) continue
-
-    let key = item.setNum
-    if (!key) key = item.itemId
-
-    const idx = usersTask.value.findIndex((e: any) => e === key)
-    if (idx !== -1) {
-      item.isShow = false
-    }
-  }
-}
 const funcNextRequest = async () => {
   const response = await axios.post(
     'https://studio.treed.ai/api/workspace/work/next',
@@ -227,23 +214,6 @@ const funcRemoveWishList = (item: any) => {
   const idx = wishList.value.findIndex((e: number) => e === key)
   wishList.value.splice(idx, 1);
 }
-const funcItemWishList = async () => {
-  // skip when waiting
-  if (waiting.value) return
-
-  const firstShowIdx = items.value.findIndex((e: any) => e.isShow === true)
-  let key = -1
-  if (firstShowIdx !== -1) {
-    key = items.value[firstShowIdx].setNum
-    if (!key) key = items.value[firstShowIdx].itemId
-  }
-
-  const idx = wishList.value.findIndex((e: number) => e === key)
-  if (idx !== -1) {
-    wishList.value.splice(idx, 1)
-    await funcNextRequest()
-  }
-}
 const getChildItem = (item: any) => {
   childItems.value = []
 
@@ -264,6 +234,42 @@ const getCookie = (cname: string) => {
   return match ? decodeURIComponent(match[1]) : '';
 }
 
+const firstItem = computed(() => {
+  const firstShowIdx = items.value.findIndex((e: any) => e.isShow === true)
+  let key = -1
+  if (firstShowIdx !== -1) {
+    key = items.value[firstShowIdx].setNum
+    if (!key) key = items.value[firstShowIdx].itemId
+  }
+  return key
+})
+
+watch(firstItem, async () => {
+  // skip when waiting
+  if (!waiting.value) {
+    const idx = wishList.value.findIndex((e: number) => e === firstItem.value)
+    if (idx !== -1) {
+      wishList.value.splice(idx, 1)
+
+      await funTimer(500)
+      await funcNextRequest()
+    }
+  }
+})
+
+watch(usersTask.value, () => {
+  for (const item of items.value) {
+    if (item.isShow === false) continue
+
+    let key = item.setNum
+    if (!key) key = item.itemId
+
+    const idx = usersTask.value.findIndex((e: any) => e === key)
+    if (idx !== -1) {
+      item.isShow = false
+    }
+  }
+})
 
 onBeforeMount(() => {
   funGetParams()
@@ -282,12 +288,6 @@ onMounted(async () => {
   // load done
   await funTimer(2000)
   waiting.value = false
-
-  // hidden pics from user's task
-  setInterval(() => { funHiddenPics() }, 1000)
-
-  // check to get wish list
-  setInterval(() => { funcItemWishList() }, 1000)
 
   // 15 minutes will reset task
   setInterval(() => { funGetPics() }, 900000)
