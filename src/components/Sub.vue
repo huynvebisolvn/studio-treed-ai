@@ -112,10 +112,12 @@ const funGetUsersTask = async (userIds: Array<string>) => {
       if (tasks && tasks[0] && tasks[0].setNum) {
         // setNum
         const maxKey = Math.max(...tasks.map(o => o.setNum))
+        console.log("đã chọn đến: ", maxKey)
         idx = items.value.findIndex(e => e.setNum === maxKey)
       } else {
         // itemId
         const maxKey = Math.max(...tasks.map(o => o.itemId))
+        console.log("đã chọn đến: ", maxKey)
         idx = items.value.findIndex(e => e.itemId === maxKey)
       }
       if (idx) {
