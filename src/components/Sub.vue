@@ -252,7 +252,7 @@ watch(firstItem, async () => {
       wishList.value.splice(idx, 1)
 
       await funTimer(500)
-      await funcNextRequest()
+      funcNextRequest()
     }
   }
 })
