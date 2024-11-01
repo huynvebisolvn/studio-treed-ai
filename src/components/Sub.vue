@@ -143,7 +143,6 @@ const funGetUsersTask = async (userId: string, userName: string) => {
   }
 }
 const funGetPics = async () => {
-  waiting.value = true
   const allTaskWorkBefore: Array<any> = await funGetTaskByUser('', 'WORK_BEFORE')
   if (allTaskWorkBefore && allTaskWorkBefore[0] && allTaskWorkBefore[0].setNum) {
     // has setNum
@@ -162,7 +161,6 @@ const funGetPics = async () => {
   }
   // allTaskWorkBefore.filter((e) => !e.operatedDate)
   items.value = allTaskWorkBefore
-  waiting.value = false
 }
 const funcNextRequest = async () => {
   const response = await axios.post(
@@ -247,6 +245,8 @@ const firstItem = computed(() => {
 const onNext = async () => {
   // skip when waiting
   if (!waiting.value) {
+    console.log(firstItem.value)
+
     const idx = wishList.value.findIndex((e: number) => e === firstItem.value)
     if (idx !== -1) {
       wishList.value.splice(idx, 1)
@@ -279,7 +279,7 @@ watch(usersTask.value, () => {
   }
 })
 
-onBeforeMount(() => {
+onBeforeMount(async () => {
   funGetParams()
 })
 
@@ -293,8 +293,8 @@ onMounted(async () => {
     funGetUsersTask(user.id, user.name)
   }
 
-  // load done
-  await funTimer(2000)
+  // wating for first load done
+  await funTimer(10000)
   waiting.value = false
 
   // 15 minutes will reset task
