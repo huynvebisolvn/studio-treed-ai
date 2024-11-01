@@ -246,7 +246,6 @@ onMounted(async () => {
     </button>
     <input class="ml-2 border-2 border-teal-500" v-model="wishListInput" placeholder="Nhập wish list"
       @input="funGetWishParams" />
-    <p class="break-all text-rose-500">  </p>
     <p class="break-all text-teal-500">{{ wishList }}</p>
     <label v-if="isError" class="text-3xl text-red-500">Hết hạn rồi, đăng nhập lại!</label>
     <div class="mt-4 grid grid-cols-4 gap-1">
