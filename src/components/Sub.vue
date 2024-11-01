@@ -279,7 +279,7 @@ watch(usersTask.value, () => {
   }
 })
 
-onBeforeMount(async () => {
+onBeforeMount(() => {
   funGetParams()
 })
 
