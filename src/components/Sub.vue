@@ -140,7 +140,7 @@ const funGetParams = () => {
 
 const funTimer = (ms: number) => new Promise((res) => setTimeout(res, ms))
 
-const funGetUsersTask = async (userIds: Array<string>) => {
+const funGetUsersTask = async (userIds: Array<any>) => {
   while (true) {
     try {
       const tasks = await funGetTaskByUser(userIds)
@@ -149,12 +149,12 @@ const funGetUsersTask = async (userIds: Array<string>) => {
         // setNum
         const maxKey = Math.max(...tasks.map(o => o.setNum))
         console.log("đã chọn đến: ", maxKey)
-        idx = items.value.findIndex(e => e.setNum === maxKey)
+        idx = items.value.findIndex((e: any) => e.setNum === maxKey)
       } else {
         // itemId
         const maxKey = Math.max(...tasks.map(o => o.itemId))
         console.log("đã chọn đến: ", maxKey)
-        idx = items.value.findIndex(e => e.itemId === maxKey)
+        idx = items.value.findIndex((e: any) => e.itemId === maxKey)
       }
       if (idx) {
         // check next item on wish
@@ -245,7 +245,7 @@ onMounted(async () => {
   const users = await funGetUsers()
   await funGetPics()
 
-  const ids = [...new Set(users.map((e) => e.id))]
+  const ids = [...new Set(users.map((e: any) => e.id))]
   funGetUsersTask(ids)
 })
 </script>
