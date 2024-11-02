@@ -312,8 +312,15 @@ onMounted(async () => {
             @click="funcAddWishList(item)">
             {{ item.setNum ? item.setNum : item.itemId }}
           </button>
-          <img v-if="loadPicture" :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`"
-            @click="getChildItem(item)">
+          <div :style="`height: ${ loadPicture ? 320 : 5 }px; width: 400px;`" class="bg-gray-300">
+            <img
+              v-if="loadPicture"
+              style="height: 320px; width: 400px;"
+              :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`"
+              @click="getChildItem(item)"
+              loading="lazy"
+            />
+          </div>
         </div>
       </template>
     </div>
