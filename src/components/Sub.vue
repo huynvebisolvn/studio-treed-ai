@@ -264,6 +264,8 @@ const processBar = computed(() => {
 
 onBeforeMount(() => {
   funGetParams()
+  // refresh page every 10 minutes
+  setTimeout(() => { window.location.reload() }, 600000)
 })
 
 onMounted(async () => {
