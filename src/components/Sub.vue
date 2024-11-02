@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import axios from 'axios';
+import { vOnClickOutside } from '@vueuse/components';
 import { ref, onBeforeMount, onMounted, computed } from "vue";
 
 const params = ref({ authorization: '', projectId: '', taskId: '', user: '' })
@@ -315,24 +316,27 @@ onMounted(async () => {
           <div :style="`height: ${ loadPicture ? 320 : 5 }px; width: 400px;`" class="bg-gray-300">
             <img
               v-if="loadPicture"
+              loading="lazy"
               style="height: 320px; width: 400px;"
               :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`"
               @click="getChildItem(item)"
-              loading="lazy"
             />
           </div>
         </div>
       </template>
     </div>
     <div v-if="childItems.length > 0" tabindex="-1" aria-hidden="true"
-      class="fixed top-0 right-0 left-[10%] z-50 justify-center w-[80%]">
-      <div class="relative p-4 w-full h-full">
-        <div class="relative rounded-lg shadow border-4 bg-gray-300">
+      class="fixed top-0 right-0 z-50 justify-items-center"
+    >
+      <div class="relative" style="width: 70%; height: 70%;" v-on-click-outside="clearChildItem">
+        <div class="relative rounded-lg shadow border-4 bg-cyan-200">
           <div class="grid grid-cols-4 gap-2 m-4 overflow-auto" style="height: 750px;">
             <template v-for="(childitem, childindex) in childItems" :key="childindex">
               <div>
                 <label>{{ childitem.setNum }} - {{ childindex + 1 }} - {{ childitem.itemId }}</label>
-                <img :key="childindex"
+                <img
+                  :key="childindex"
+                  loading="lazy"
                   :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${childitem.filePath}`">
               </div>
             </template>
