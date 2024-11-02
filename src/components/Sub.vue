@@ -2,13 +2,14 @@
 import axios from 'axios';
 import { ref, onBeforeMount, onMounted } from "vue";
 
-const params = ref({ authorization: '', projectId: '', taskId: '' })
+const params = ref({ authorization: '', projectId: '', taskId: '', user: '' })
 const loadPicture: any = ref(false)
 const nextIdx = ref()
 const items: any = ref([])
 const wishList: any = ref([])
 const wishListInput: any = ref('')
 const childItems: any = ref([])
+const myTaskList: any = ref([])
 const isError = ref(false)
 
 const funGetUsers = async () => {
@@ -125,6 +126,7 @@ const funGetParams = () => {
   params.value.authorization = String(urlParams.get("authorization"))
   params.value.projectId = String(urlParams.get("projectId"))
   params.value.taskId = String(urlParams.get("taskId"))
+  params.value.user = String(urlParams.get("user"))
 
   const _taskId = getCookie('taskId')
   if (!_taskId || params.value.taskId === _taskId) {
@@ -169,6 +171,17 @@ const funGetUsersTask = async (userIds: Array<any>) => {
     } catch (error) { }
   }
 }
+
+const funGetMyTask = async (userId: number) => {
+  while (true) {
+    try {
+      const tasks = await funGetTaskByUser([String(userId)])
+      myTaskList.value = [...new Set(tasks.map((e: any) => e.setNum ? e.setNum : e.itemId))]
+      await funTimer(10000)
+    } catch (error) { }
+  }
+}
+
 const funGetPics = async () => {
   const allTaskWorkBefore: Array<any> = await funGetTaskByUser(undefined)
   if (allTaskWorkBefore && allTaskWorkBefore[0] && allTaskWorkBefore[0].setNum) {
@@ -245,8 +258,15 @@ onMounted(async () => {
   const users = await funGetUsers()
   await funGetPics()
 
+  // loop for fetch task
   const ids = [...new Set(users.map((e: any) => e.id))]
   funGetUsersTask(ids)
+
+  // get my task
+  const myUser = users.find((e: any) => e.name === params.value.user)
+  if (myUser) {
+    funGetMyTask(myUser.id)
+  }
 })
 </script>
 
@@ -259,6 +279,7 @@ onMounted(async () => {
     </button>
     <input class="ml-2 border-2 border-teal-500" v-model="wishListInput" placeholder="Nhập wish list"
       @input="funGetWishParams" />
+    <p class="break-all text-rose-500">{{ myTaskList }}</p>
     <p class="break-all text-teal-500">{{ wishList }}</p>
     <label v-if="isError" class="text-3xl text-red-500">Hết hạn rồi, đăng nhập lại!</label>
     <div class="mt-4 grid grid-cols-4 gap-1">
