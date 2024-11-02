@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import axios from 'axios';
 import { vOnClickOutside } from '@vueuse/components';
-import { ref, onBeforeMount, onMounted, computed } from "vue";
+import { ref, onBeforeMount, onMounted, computed, watch } from "vue";
 
 const params = ref({ authorization: '', projectId: '', taskId: '', user: '' })
 const loadPicture: any = ref(false)
@@ -117,7 +117,6 @@ const funGetWishParams = () => {
     }
   }
   wishList.value = rs
-  setCookie('wishList', rs.join(','))
 }
 
 const funGetParams = () => {
@@ -257,6 +256,10 @@ const getCookie = (cname: string) => {
   return match ? decodeURIComponent(match[1]) : '';
 }
 
+watch(wishList, () => {
+  setCookie('wishList', wishList.value.join(','))
+}, { deep: true })
+
 const processBar = computed(() => {
   const hiddenList = items.value.filter((e: any) => !e.isShow)
   return hiddenList.length / items.value.length * 100
@@ -264,8 +267,13 @@ const processBar = computed(() => {
 
 onBeforeMount(() => {
   funGetParams()
+
   // refresh page every 10 minutes
-  setTimeout(() => { window.location.reload() }, 600000)
+  setInterval(()=> {
+    if (!loadPicture.value) {
+      window.location.reload()
+    }
+  }, 600000)
 })
 
 onMounted(async () => {
@@ -292,8 +300,7 @@ onMounted(async () => {
       @click="loadPicture = !loadPicture">
       Picture
     </button>
-    <input class="ml-2 border-2 border-teal-500" v-model="wishListInput" placeholder="Nhập wish list"
-      @input="funGetWishParams" />
+    <input class="ml-2 border-2 border-teal-500" v-model="wishListInput" placeholder="Nhập wish list" @input="funGetWishParams" />
     <p class="break-all text-rose-500">{{ myTaskList }}</p>
     <p class="break-all text-teal-500">{{ wishList }}</p>
     <label v-if="isError" class="text-3xl text-red-500">Hết hạn rồi, đăng nhập lại!</label>
