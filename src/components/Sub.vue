@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import axios from 'axios';
-import { ref, onBeforeMount, onMounted } from "vue";
+import { ref, onBeforeMount, onMounted, computed } from "vue";
 
 const params = ref({ authorization: '', projectId: '', taskId: '', user: '' })
 const loadPicture: any = ref(false)
@@ -256,6 +256,11 @@ const getCookie = (cname: string) => {
   return match ? decodeURIComponent(match[1]) : '';
 }
 
+const processBar = computed(() => {
+  const hiddenList = items.value.filter((e: any) => !e.isShow)
+  return hiddenList.length / items.value.length * 100
+})
+
 onBeforeMount(() => {
   funGetParams()
 })
@@ -289,6 +294,11 @@ onMounted(async () => {
     <p class="break-all text-rose-500">{{ myTaskList }}</p>
     <p class="break-all text-teal-500">{{ wishList }}</p>
     <label v-if="isError" class="text-3xl text-red-500">Hết hạn rồi, đăng nhập lại!</label>
+
+    <div class="w-full rounded-full mt-2 bg-gray-200">
+      <div class="rounded-full bg-cyan-500 p-0.5 text-center text-xs font-medium leading-none text-blue-100" :style="`width: ${processBar}%`">{{ processBar }}%</div>
+    </div>
+
     <div class="mt-4 grid grid-cols-4 gap-1">
       <template v-for="(item, index) in items" :key="index">
         <div v-if="item.isShow">
