@@ -4,7 +4,6 @@ import { ref, onBeforeMount, onMounted } from "vue";
 
 const params = ref({ authorization: '', projectId: '', taskId: '', user: '' })
 const loadPicture: any = ref(false)
-const nextIdx = ref()
 const items: any = ref([])
 const wishList: any = ref([])
 const wishListInput: any = ref('')
@@ -146,23 +145,31 @@ const funGetUsersTask = async (userIds: Array<any>) => {
   while (true) {
     try {
       const tasks = await funGetTaskByUser(userIds)
-      let idx = undefined
+      let assignedTask = []
       if (tasks && tasks[0] && tasks[0].setNum) {
         // setNum
-        const maxKey = Math.max(...tasks.map(o => o.setNum))
-        console.log("đã chọn đến: ", maxKey)
-        idx = items.value.findIndex((e: any) => e.setNum === maxKey)
+        assignedTask = [...new Set(tasks.map((e: any) => e.setNum))]
       } else {
         // itemId
-        const maxKey = Math.max(...tasks.map(o => o.itemId))
-        console.log("đã chọn đến: ", maxKey)
-        idx = items.value.findIndex((e: any) => e.itemId === maxKey)
+        assignedTask = [...new Set(tasks.map((e: any) => e.itemId))]
       }
-      if (idx) {
+
+      // console.log("assigned task: ", assignedTask)
+      for (const key of assignedTask) {
+        const idx = items.value.findIndex((e: any) => e.setNum ? e.setNum === key : e.itemId === key)
+        if (idx !== -1) {
+          items.value[idx].isShow = false
+        }
+      }
+
+      const firstItem = items.value.find((e: any) => e.isShow)
+      if (firstItem) {
         // check next item on wish
-        nextIdx.value = idx + 1
-        const isOnWish = funcCheckOnWishList(items.value[idx + 1])
-        if (isOnWish) {
+        let key = firstItem.setNum
+        if (!key) key = firstItem.itemId
+
+        const idx = wishList.value.findIndex((e: number) => e === key)
+        if (idx !== -1) {
           wishList.value.splice(idx, 1)
           await funcNextRequest()
         }
@@ -284,7 +291,7 @@ onMounted(async () => {
     <label v-if="isError" class="text-3xl text-red-500">Hết hạn rồi, đăng nhập lại!</label>
     <div class="mt-4 grid grid-cols-4 gap-1">
       <template v-for="(item, index) in items" :key="index">
-        <div v-if="item.isShow && index >= nextIdx">
+        <div v-if="item.isShow">
           <button v-if="funcCheckOnWishList(item)" type="button"
             class="px-3 mb-1 text-white bg-green-700 hover:bg-green-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-green-600 dark:hover:bg-green-700"
             @click="funcRemoveWishList(item)">
