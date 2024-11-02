@@ -11,36 +11,6 @@ const wishListInput: any = ref('')
 const childItems: any = ref([])
 const isError = ref(false)
 
-const funTimer = (ms: number) => new Promise((res) => setTimeout(res, ms))
-const funGetParams = () => {
-  const uri = window.location.search.substring(1);
-  const urlParams = new URLSearchParams(uri);
-  params.value.authorization = String(urlParams.get("authorization"))
-  params.value.projectId = String(urlParams.get("projectId"))
-  params.value.taskId = String(urlParams.get("taskId"))
-
-  const _taskId = getCookie('taskId')
-  if (!_taskId || params.value.taskId === _taskId) {
-    const _wishList = getCookie('wishList')
-    // set wishList
-    wishListInput.value = _wishList
-    funGetWishParams()
-  } else {
-    setCookie('wishList', '')
-  }
-  setCookie('taskId', params.value.taskId)
-}
-const funGetWishParams = () => {
-  const wishs = wishListInput.value?.split(',')
-  let rs = []
-  if (wishs) {
-    for (const wish of wishs) {
-      if (Number(wish)) rs.push(Number(wish))
-    }
-  }
-  wishList.value = rs
-  setCookie('wishList', rs.join(','))
-}
 const funGetUsers = async () => {
   const response = await axios.get(`https://studio.treed.ai/api/dashboard/status/people/${params.value.taskId}/WORK`, {
     headers: {
@@ -67,6 +37,7 @@ const funGetUsers = async () => {
   if (response.data?.code?.includes("TK")) isError.value = true
   return response.data.operators
 }
+
 const funGetTaskByUser = async (userIds?: Array<string>): Promise<Array<any>> => {
   const idsParam = userIds ? userIds.join(',') : ''
   const response = await axios.get('https://studio.treed.ai/api/workspace/items', {
@@ -104,6 +75,71 @@ const funGetTaskByUser = async (userIds?: Array<string>): Promise<Array<any>> =>
   if (response.data?.code?.includes("TK")) isError.value = true
   return response.data.items
 }
+
+const funcNextRequest = async () => {
+  const response = await axios.post(
+    'https://studio.treed.ai/api/workspace/work/next',
+    {
+      'taskId': `${params.value.taskId}`,
+      'workType': 'OPERATOR'
+    },
+    {
+      headers: {
+        'accept-language': 'en-US,en;q=0.9,vi-VN;q=0.8,vi;q=0.7,fr-FR;q=0.6,fr;q=0.5',
+        'access-control-allow-origin': '*',
+        'access-control-expose-headers': 'Authorization,Content-Disposition,Content-Type',
+        'authorization': `${params.value.authorization}`,
+        'cookie': 'modalType=update; modalClosed=false;',
+        'dnt': '1',
+        'origin': 'https://studio.treed.ai',
+        'priority': 'u=1, i',
+        'referer': `https://studio.treed.ai/workspace/${params.value.taskId}?workType=OPERATOR`,
+        'sec-ch-ua': '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"macOS"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+      }
+    }
+  );
+  console.log(response)
+}
+
+const funGetWishParams = () => {
+  const wishs = wishListInput.value?.split(',')
+  let rs = []
+  if (wishs) {
+    for (const wish of wishs) {
+      if (Number(wish)) rs.push(Number(wish))
+    }
+  }
+  wishList.value = rs
+  setCookie('wishList', rs.join(','))
+}
+
+const funGetParams = () => {
+  const uri = window.location.search.substring(1);
+  const urlParams = new URLSearchParams(uri);
+  params.value.authorization = String(urlParams.get("authorization"))
+  params.value.projectId = String(urlParams.get("projectId"))
+  params.value.taskId = String(urlParams.get("taskId"))
+
+  const _taskId = getCookie('taskId')
+  if (!_taskId || params.value.taskId === _taskId) {
+    const _wishList = getCookie('wishList')
+    // set wishList
+    wishListInput.value = _wishList
+    funGetWishParams()
+  } else {
+    setCookie('wishList', '')
+  }
+  setCookie('taskId', params.value.taskId)
+}
+
+const funTimer = (ms: number) => new Promise((res) => setTimeout(res, ms))
+
 const funGetUsersTask = async (userIds: Array<string>) => {
   while (true) {
     try {
@@ -153,36 +189,7 @@ const funGetPics = async () => {
   // allTaskWorkBefore.filter((e) => !e.operatedDate)
   items.value = allTaskWorkBefore
 }
-const funcNextRequest = async () => {
-  const response = await axios.post(
-    'https://studio.treed.ai/api/workspace/work/next',
-    {
-      'taskId': `${params.value.taskId}`,
-      'workType': 'OPERATOR'
-    },
-    {
-      headers: {
-        'accept-language': 'en-US,en;q=0.9,vi-VN;q=0.8,vi;q=0.7,fr-FR;q=0.6,fr;q=0.5',
-        'access-control-allow-origin': '*',
-        'access-control-expose-headers': 'Authorization,Content-Disposition,Content-Type',
-        'authorization': `${params.value.authorization}`,
-        'cookie': 'modalType=update; modalClosed=false;',
-        'dnt': '1',
-        'origin': 'https://studio.treed.ai',
-        'priority': 'u=1, i',
-        'referer': `https://studio.treed.ai/workspace/${params.value.taskId}?workType=OPERATOR`,
-        'sec-ch-ua': '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"macOS"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
-      }
-    }
-  );
-  console.log(response)
-}
+
 const funcCheckOnWishList = (item: any) => {
   let key = item.setNum
   if (!key) key = item.itemId
@@ -190,12 +197,14 @@ const funcCheckOnWishList = (item: any) => {
   const idx = wishList.value.findIndex((e: number) => e === key)
   return idx !== -1
 }
+
 const funcAddWishList = (item: any) => {
   let key = item.setNum
   if (!key) key = item.itemId
 
   wishList.value.push(key)
 }
+
 const funcRemoveWishList = (item: any) => {
   let key = item.setNum
   if (!key) key = item.itemId
@@ -203,6 +212,7 @@ const funcRemoveWishList = (item: any) => {
   const idx = wishList.value.findIndex((e: number) => e === key)
   wishList.value.splice(idx, 1);
 }
+
 const getChildItem = (item: any) => {
   childItems.value = []
 
@@ -211,12 +221,15 @@ const getChildItem = (item: any) => {
     childItems.value = items.value.filter((e: any) => e.setNum === key)
   }
 }
+
 const clearChildItem = () => {
   childItems.value = []
 }
+
 const setCookie = (cname: string, cvalue: string) => {
   document.cookie = cname + '=' + encodeURIComponent(cvalue) + '; path=/';
 }
+
 const getCookie = (cname: string) => {
   const regex = new RegExp('(?:^|; )' + encodeURIComponent(cname) + '=([^;]*)');
   const match = document.cookie.match(regex);
