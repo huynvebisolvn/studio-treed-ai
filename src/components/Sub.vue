@@ -109,7 +109,7 @@ const funcNextRequest = async () => {
 }
 
 const funGetWishParams = () => {
-  const wishs = wishListInput.value?.split(',')
+  const wishs = wishListInput.value?.replaceAll('[', '').replaceAll(']', '').split(',')
   let rs = []
   if (wishs) {
     for (const wish of wishs) {
