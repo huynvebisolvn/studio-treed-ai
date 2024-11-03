@@ -4,7 +4,9 @@ import { useInterval } from '@vueuse/core';
 import { vOnClickOutside } from '@vueuse/components';
 import { ref, onBeforeMount, onMounted, computed, watch } from "vue";
 
-const counter = useInterval(1000)
+const { counter, pause, resume } = useInterval(1000, { controls: true })
+const REFRESH_TIME = 600
+
 const params = ref({ authorization: '', projectId: '', taskId: '', user: '' })
 const loadPicture: any = ref(false)
 const items: any = ref([])
@@ -235,6 +237,15 @@ const funcRemoveWishList = (item: any) => {
   wishList.value.splice(idx, 1);
 }
 
+const togglePicture = () => {
+  loadPicture.value = !loadPicture.value
+  if (!loadPicture.value) {
+    resume()
+  } else {
+    pause()
+  }
+}
+
 const getChildItem = (item: any) => {
   childItems.value = []
 
@@ -259,8 +270,8 @@ const getCookie = (cname: string) => {
 }
 
 watch(counter, () => {
-  // refresh page every 10 minutes (600s)
-  if (counter.value >= 600 && !loadPicture.value) {
+  // refresh page every 10 minutes
+  if (counter.value >= REFRESH_TIME && !loadPicture.value) {
     window.location.reload()
   }
 })
@@ -301,12 +312,12 @@ onMounted(async () => {
       <div class="basis-1/2">
         <button type="button"
           class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700"
-          @click="loadPicture = !loadPicture">
+          @click="togglePicture">
           Picture
         </button>
         <input class="ml-2 border-2 border-teal-500 w-1/2" v-model="wishListInput" placeholder="Nhập wish list" @input="funGetWishParams" />
       </div>      
-      <div class="basis-1/2 text-right text-rose-500">{{ 600 - counter }}</div>
+      <div class="basis-1/2 text-right text-rose-500">{{ REFRESH_TIME - counter }}</div>
     </div>
     <p class="break-all text-rose-500">{{ myTaskList }}</p>
     <p class="break-all text-teal-500">{{ wishList }}</p>
