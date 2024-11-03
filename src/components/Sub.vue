@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import axios from 'axios';
+import { useInterval } from '@vueuse/core';
 import { vOnClickOutside } from '@vueuse/components';
 import { ref, onBeforeMount, onMounted, computed, watch } from "vue";
 
+const counter = useInterval(1000)
 const params = ref({ authorization: '', projectId: '', taskId: '', user: '' })
 const loadPicture: any = ref(false)
 const items: any = ref([])
@@ -256,6 +258,13 @@ const getCookie = (cname: string) => {
   return match ? decodeURIComponent(match[1]) : '';
 }
 
+watch(counter, () => {
+  // refresh page every 10 minutes (600s)
+  if (counter.value >= 600 && !loadPicture.value) {
+    window.location.reload()
+  }
+})
+
 watch(wishList, () => {
   setCookie('wishList', wishList.value.join(','))
 }, { deep: true })
@@ -267,13 +276,6 @@ const processBar = computed(() => {
 
 onBeforeMount(() => {
   funGetParams()
-
-  // refresh page every 10 minutes
-  setInterval(()=> {
-    if (!loadPicture.value) {
-      window.location.reload()
-    }
-  }, 600000)
 })
 
 onMounted(async () => {
@@ -295,12 +297,17 @@ onMounted(async () => {
 
 <template>
   <div class="m-4">
-    <button type="button"
-      class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700"
-      @click="loadPicture = !loadPicture">
-      Picture
-    </button>
-    <input class="ml-2 border-2 border-teal-500" v-model="wishListInput" placeholder="Nhập wish list" @input="funGetWishParams" />
+    <div class="flex flex-row">
+      <div class="basis-1/2">
+        <button type="button"
+          class="px-5 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none font-medium rounded-lg px-1 text-center dark:bg-blue-600 dark:hover:bg-blue-700"
+          @click="loadPicture = !loadPicture">
+          Picture
+        </button>
+        <input class="ml-2 border-2 border-teal-500 w-1/2" v-model="wishListInput" placeholder="Nhập wish list" @input="funGetWishParams" />
+      </div>      
+      <div class="basis-1/2 text-right text-rose-500">{{ 600 - counter }}</div>
+    </div>
     <p class="break-all text-rose-500">{{ myTaskList }}</p>
     <p class="break-all text-teal-500">{{ wishList }}</p>
     <label v-if="isError" class="text-3xl text-red-500">Hết hạn rồi, đăng nhập lại!</label>
