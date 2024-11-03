@@ -153,19 +153,24 @@ const funGetUsersTask = async (userIds: Array<any>) => {
       if (tasks && tasks[0] && tasks[0].setNum) {
         // setNum
         assignedTask = [...new Set(tasks.map((e: any) => e.setNum))]
+        for (const key of assignedTask) {
+          const idx = items.value.findIndex((e: any) => e.setNum === key)
+          if (idx !== -1) {
+            items.value[idx].isShow = false
+          }
+        }
       } else {
         // itemId
         assignedTask = [...new Set(tasks.map((e: any) => e.itemId))]
-      }
-
-      // console.log("assigned task: ", assignedTask)
-      for (const key of assignedTask) {
-        const idx = items.value.findIndex((e: any) => e.setNum ? e.setNum === key : e.itemId === key)
-        if (idx !== -1) {
-          items.value[idx].isShow = false
+        for (const key of assignedTask) {
+          const idx = items.value.findIndex((e: any) => e.itemId === key)
+          if (idx !== -1) {
+            items.value[idx].isShow = false
+          }
         }
       }
 
+      // important: get task
       const firstItem = items.value.find((e: any) => e.isShow)
       if (firstItem) {
         // check next item on wish
