@@ -208,15 +208,21 @@ const funGetPics = async () => {
         data.isShow = true
         setNum = data.setNum
       }
+      if (data.itemStatus !== 'WORK_BEFORE') {
+        data.isShow = false
+      }
     }
   } else {
     // don't has setNum
     for (const data of allTaskWorkBefore) {
       data.isShow = true
+      if (data.itemStatus !== 'WORK_BEFORE') {
+        data.isShow = false
+      }
     }
   }
 
-  items.value = allTaskWorkBefore.filter((e) => !e.operatedDate)
+  items.value = allTaskWorkBefore
 }
 
 const funcCheckOnWishList = (item: any) => {
