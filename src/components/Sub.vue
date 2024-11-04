@@ -215,8 +215,8 @@ const funGetPics = async () => {
       data.isShow = true
     }
   }
-  // allTaskWorkBefore.filter((e) => !e.operatedDate)
-  items.value = allTaskWorkBefore
+
+  items.value = allTaskWorkBefore.filter((e) => !e.operatedDate)
 }
 
 const funcCheckOnWishList = (item: any) => {
