@@ -5,7 +5,7 @@ import { vOnClickOutside } from '@vueuse/components';
 import { ref, onBeforeMount, onMounted, computed, watch } from "vue";
 
 const { counter, pause, resume } = useInterval(1000, { controls: true })
-const REFRESH_TIME = 300
+const REFRESH_TIME = 600
 
 const params = ref({ authorization: '', projectId: '', taskId: '', user: '' })
 const loadPicture: any = ref(false)
@@ -43,7 +43,7 @@ const funGetUsers = async () => {
   return response.data.operators
 }
 
-const funGetTaskByUser = async (userIds?: Array<string>): Promise<Array<any>> => {
+const funGetTaskByUser = async (userIds?: Array<string>, status?: string): Promise<Array<any>> => {
   const idsParam = userIds ? userIds.join(',') : ''
   const response = await axios.get('https://studio.treed.ai/api/workspace/items', {
     params: {
@@ -53,7 +53,7 @@ const funGetTaskByUser = async (userIds?: Array<string>): Promise<Array<any>> =>
       'keyword': '',
       'page': '0',
       'limit': '999999999',
-      'statuses': '',
+      'statuses': `${status}`,
       'operatorIds': `${idsParam}`
     },
     headers: {
@@ -145,33 +145,41 @@ const funGetParams = () => {
 
 const funTimer = (ms: number) => new Promise((res) => setTimeout(res, ms))
 
-const funGetUsersTask = async (userIds: Array<any>) => {
+const funGetUsersTask = async (userIds: Array<any>, myIds: number) => {
   while (true) {
     try {
+      const originalTasks = await funGetPics('WORK_BEFORE')
+
       const tasks = await funGetTaskByUser(userIds)
+
       let assignedTask = []
       if (tasks && tasks[0] && tasks[0].setNum) {
         // setNum
         assignedTask = [...new Set(tasks.map((e: any) => e.setNum))]
         for (const key of assignedTask) {
-          const idx = items.value.findIndex((e: any) => e.setNum === key)
+          const idx = originalTasks.findIndex((e: any) => e.setNum === key)
           if (idx !== -1) {
-            items.value[idx].isShow = false
+            originalTasks[idx].isShow = false
           }
         }
       } else {
         // itemId
         assignedTask = [...new Set(tasks.map((e: any) => e.itemId))]
         for (const key of assignedTask) {
-          const idx = items.value.findIndex((e: any) => e.itemId === key)
+          const idx = originalTasks.findIndex((e: any) => e.itemId === key)
           if (idx !== -1) {
-            items.value[idx].isShow = false
+            originalTasks[idx].isShow = false
           }
         }
       }
 
+      // update new item
+      items.value = originalTasks
+
       // important: get task
-      const firstItem = items.value.find((e: any) => e.isShow)
+      const firstItem = originalTasks.find((e: any) => e.isShow)
+      console.log(firstItem.setNum ? firstItem.setNum : firstItem.itemId)
+
       if (firstItem) {
         // check next item on wish
         let key = firstItem.setNum
@@ -181,6 +189,9 @@ const funGetUsersTask = async (userIds: Array<any>) => {
         if (idx !== -1) {
           wishList.value.splice(idx, 1)
           await funcNextRequest()
+
+          // no await get my task
+          funGetMyTask(myIds)
         }
       }
       await funTimer(2000)
@@ -189,40 +200,28 @@ const funGetUsersTask = async (userIds: Array<any>) => {
 }
 
 const funGetMyTask = async (userId: number) => {
-  while (true) {
-    try {
-      const tasks = await funGetTaskByUser([String(userId)])
-      myTaskList.value = [...new Set(tasks.map((e: any) => e.setNum ? e.setNum : e.itemId))]
-      await funTimer(10000)
-    } catch (error) { }
-  }
+  const tasks = await funGetTaskByUser([String(userId)])
+  myTaskList.value = [...new Set(tasks.map((e: any) => e.setNum ? e.setNum : e.itemId))]
 }
 
-const funGetPics = async () => {
-  const allTaskWorkBefore: Array<any> = await funGetTaskByUser(undefined)
-  if (allTaskWorkBefore && allTaskWorkBefore[0] && allTaskWorkBefore[0].setNum) {
+const funGetPics = async (status: string) => {
+  const tasks: Array<any> = await funGetTaskByUser(undefined, status)
+  if (tasks && tasks[0] && tasks[0].setNum) {
     // has setNum
     let setNum = 0
-    for (const data of allTaskWorkBefore) {
-      if (setNum != data.setNum) {
-        data.isShow = true
-        setNum = data.setNum
-      }
-      if (data.itemStatus !== 'WORK_BEFORE') {
-        data.isShow = false
+    for (const task of tasks) {
+      if (setNum != task.setNum) {
+        task.isShow = true
+        setNum = task.setNum
       }
     }
   } else {
     // don't has setNum
-    for (const data of allTaskWorkBefore) {
-      data.isShow = true
-      if (data.itemStatus !== 'WORK_BEFORE') {
-        data.isShow = false
-      }
+    for (const task of tasks) {
+      task.isShow = true
     }
   }
-
-  items.value = allTaskWorkBefore
+  return tasks
 }
 
 const funcCheckOnWishList = (item: any) => {
@@ -291,11 +290,6 @@ watch(wishList, () => {
   setCookie('wishList', wishList.value.join(','))
 }, { deep: true })
 
-const processBar = computed(() => {
-  const hiddenList = items.value.filter((e: any) => !e.isShow)
-  return hiddenList.length / items.value.length * 100
-})
-
 onBeforeMount(() => {
   funGetParams()
 })
@@ -303,17 +297,16 @@ onBeforeMount(() => {
 onMounted(async () => {
   // get first all user and task
   const users = await funGetUsers()
-  await funGetPics()
-
-  // loop for fetch task
-  const ids = [...new Set(users.map((e: any) => e.id))]
-  funGetUsersTask(ids)
+  // show item in screen
+  items.value = await funGetPics('WORK_BEFORE')
 
   // get my task
   const myUser = users.find((e: any) => e.name === params.value.user)
-  if (myUser) {
-    funGetMyTask(myUser.id)
-  }
+  funGetMyTask(myUser.id)
+
+  // loop for fetch task
+  const ids = [...new Set(users.map((e: any) => e.id))]
+  funGetUsersTask(ids, myUser.id)
 })
 </script>
 
@@ -333,10 +326,6 @@ onMounted(async () => {
     <p class="break-all text-rose-500">{{ myTaskList }}</p>
     <p class="break-all text-teal-500">{{ wishList }}</p>
     <label v-if="isError" class="text-3xl text-red-500">Hết hạn rồi, đăng nhập lại!</label>
-
-    <div class="w-full rounded-full mt-2 bg-gray-200">
-      <div class="rounded-full bg-cyan-500 p-0.5 text-center text-xs font-medium leading-none text-blue-100" :style="`width: ${processBar}%`">{{ processBar }}%</div>
-    </div>
 
     <div class="mt-4 grid grid-cols-4 gap-1">
       <template v-for="(item, index) in items" :key="index">
