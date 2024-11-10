@@ -5,7 +5,7 @@ import { vOnClickOutside } from '@vueuse/components'
 import { ref, onBeforeMount, onMounted, computed, watch } from "vue"
 
 const { counter, pause, resume } = useInterval(1000, { controls: true })
-const REFRESH_TIME = 600
+const REFRESH_TIME = 300
 
 const params = ref({ authorization: '', projectId: '', taskId: '', user: '' })
 const loadPicture: any = ref(false)
@@ -249,7 +249,7 @@ const getCookie = (cname: string) => {
 }
 
 watch(counter, () => {
-  // refresh page every 10 minutes
+  // refresh page every time
   if (counter.value >= REFRESH_TIME && !loadPicture.value) {
     window.location.reload()
   }
