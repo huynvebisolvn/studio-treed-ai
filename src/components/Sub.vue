@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import axios from 'axios';
-import { useInterval } from '@vueuse/core';
-import { vOnClickOutside } from '@vueuse/components';
-import { ref, onBeforeMount, onMounted, computed, watch } from "vue";
+import axios from 'axios'
+import { useInterval } from '@vueuse/core'
+import { vOnClickOutside } from '@vueuse/components'
+import { ref, onBeforeMount, onMounted, computed, watch } from "vue"
 
 const { counter, pause, resume } = useInterval(1000, { controls: true })
 const REFRESH_TIME = 600
@@ -37,7 +37,7 @@ const funGetUsers = async () => {
       'sec-fetch-site': 'same-origin',
       'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
     }
-  });
+  })
   // error
   if (response.data?.code?.includes("TK")) isError.value = true
   return response.data.operators
@@ -108,7 +108,7 @@ const funcNextRequest = async () => {
         'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
       }
     }
-  );
+  )
   console.log(response)
 }
 
@@ -124,8 +124,8 @@ const funGetWishParams = () => {
 }
 
 const funGetParams = () => {
-  const uri = window.location.search.substring(1);
-  const urlParams = new URLSearchParams(uri);
+  const uri = window.location.search.substring(1)
+  const urlParams = new URLSearchParams(uri)
   params.value.authorization = String(urlParams.get("authorization"))
   params.value.projectId = String(urlParams.get("projectId"))
   params.value.taskId = String(urlParams.get("taskId"))
@@ -244,7 +244,7 @@ const funcRemoveWishList = (item: any) => {
   if (!key) key = item.itemId
 
   const idx = wishList.value.findIndex((e: number) => e === key)
-  wishList.value.splice(idx, 1);
+  wishList.value.splice(idx, 1)
 }
 
 const togglePicture = () => {
@@ -272,13 +272,13 @@ const clearChildItem = () => {
 }
 
 const setCookie = (cname: string, cvalue: string) => {
-  document.cookie = cname + '=' + encodeURIComponent(cvalue) + '; path=/';
+  document.cookie = cname + '=' + encodeURIComponent(cvalue) + '; path=/'
 }
 
 const getCookie = (cname: string) => {
-  const regex = new RegExp('(?:^|; )' + encodeURIComponent(cname) + '=([^;]*)');
-  const match = document.cookie.match(regex);
-  return match ? decodeURIComponent(match[1]) : '';
+  const regex = new RegExp('(?:^|; )' + encodeURIComponent(cname) + '=([^;]*)')
+  const match = document.cookie.match(regex)
+  return match ? decodeURIComponent(match[1]) : ''
 }
 
 watch(counter, () => {
@@ -354,18 +354,19 @@ onMounted(async () => {
         </div>
       </template>
     </div>
-    <div v-if="childItems.length > 1" tabindex="-1" aria-hidden="true" class="fixed top-5 z-50 justify-items-center w-full h-full">
-      <div class="relative grid grid-cols-2 gap-2 overflow-auto rounded-lg shadow border-4 bg-gray-200" style="height: 900px; width: 80%;" v-on-click-outside="clearChildItem">
+
+    <div v-if="childItems.length > 1" tabindex="-1" aria-hidden="true" class="fixed top-0 z-50 justify-items-center w-full h-full">
+      <div class="relative grid grid-cols-2 gap-2 overflow-auto rounded-lg shadow border-4 bg-gray-200 h-full" style="width: 80%;" v-on-click-outside="clearChildItem">
         <template v-for="(childitem, childindex) in childItems" :key="childindex">
           <img loading="lazy" :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${childitem.filePath}`" />
         </template>
       </div>
     </div>
-    <div v-if="childItems.length === 1" tabindex="-1" aria-hidden="true" class="fixed top-5 left-0 z-50 justify-items-center w-full h-full">
+
+    <div v-if="childItems.length === 1" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 z-50 justify-items-center w-full h-full">
       <img
-        class="relative rounded-lg shadow border-4 bg-gray-200"
+        class="relative rounded-lg shadow border-4 bg-gray-200 h-full"
         loading="lazy"
-        style="height: 900px;"
         :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${childItems[0]?.filePath}`"
         v-on-click-outside="clearChildItem"
       />
