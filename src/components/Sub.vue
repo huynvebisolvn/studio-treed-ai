@@ -115,7 +115,7 @@ const funTimer = (ms: number) => new Promise((res) => setTimeout(res, ms))
 const funGetUsersTask = async (userIds: Array<any>, myIds: number) => {
   while (true) {
     try {
-      const originalTasks = await funGetPics('WORK_BEFORE')
+      let originalTasks = await funGetPics('WORK_BEFORE')
 
       const tasks = await funGetTaskByUser(userIds)
 
@@ -123,19 +123,19 @@ const funGetUsersTask = async (userIds: Array<any>, myIds: number) => {
       if (tasks && tasks[0] && tasks[0].setNum) {
         // setNum
         assignedTask = [...new Set(tasks.map((e: any) => e.setNum))]
-        for (const key of assignedTask) {
-          const idx = originalTasks.findIndex((e: any) => e.setNum === key)
+        for (const orgTask of originalTasks) {
+          const idx = assignedTask.findIndex((e: any) => e === orgTask.setNum)
           if (idx !== -1) {
-            originalTasks[idx].isShow = false
+            orgTask.isShow = false
           }
         }
       } else {
         // itemId
         assignedTask = [...new Set(tasks.map((e: any) => e.itemId))]
-        for (const key of assignedTask) {
-          const idx = originalTasks.findIndex((e: any) => e.itemId === key)
+        for (const orgTask of originalTasks) {
+          const idx = assignedTask.findIndex((e: any) => e === orgTask.itemId)
           if (idx !== -1) {
-            originalTasks[idx].isShow = false
+            orgTask.isShow = false
           }
         }
       }
