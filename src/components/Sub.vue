@@ -262,6 +262,8 @@ const getChildItem = (item: any) => {
   let key = item.setNum
   if (key) {
     childItems.value = items.value.filter((e: any) => e.setNum === key)
+  } else {
+    childItems.value.push(item)
   }
 }
 
@@ -352,29 +354,21 @@ onMounted(async () => {
         </div>
       </template>
     </div>
-    <div v-if="childItems.length > 0" tabindex="-1" aria-hidden="true"
-      class="fixed top-0 right-0 z-50 justify-items-center"
-    >
-      <div class="relative" style="width: 70%; height: 70%;" v-on-click-outside="clearChildItem">
-        <div class="relative rounded-lg shadow border-4 bg-cyan-200">
-          <div class="grid grid-cols-4 gap-2 m-4 overflow-auto" style="height: 750px;">
-            <template v-for="(childitem, childindex) in childItems" :key="childindex">
-              <div>
-                <label>{{ childitem.setNum }} - {{ childindex + 1 }} - {{ childitem.itemId }}</label>
-                <img
-                  :key="childindex"
-                  loading="lazy"
-                  :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${childitem.filePath}`">
-              </div>
-            </template>
-          </div>
-          <div class="flex items-center p-2 md:p-5 rounded-b dark:border-gray-600">
-            <button data-modal-hide="default-modal" type="button"
-              class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-              @click="clearChildItem()">Bỏ Qua</button>
-          </div>
-        </div>
+    <div v-if="childItems.length > 1" tabindex="-1" aria-hidden="true" class="fixed top-5 z-50 justify-items-center w-full h-full">
+      <div class="relative grid grid-cols-2 gap-2 overflow-auto rounded-lg shadow border-4 bg-gray-200" style="height: 900px; width: 80%;" v-on-click-outside="clearChildItem">
+        <template v-for="(childitem, childindex) in childItems" :key="childindex">
+          <img loading="lazy" :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${childitem.filePath}`" />
+        </template>
       </div>
+    </div>
+    <div v-if="childItems.length === 1" tabindex="-1" aria-hidden="true" class="fixed top-5 left-0 z-50 justify-items-center w-full h-full">
+      <img
+        class="relative rounded-lg shadow border-4 bg-gray-200"
+        loading="lazy"
+        style="height: 900px;"
+        :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${childItems[0]?.filePath}`"
+        v-on-click-outside="clearChildItem"
+      />
     </div>
   </div>
 </template>
