@@ -342,10 +342,11 @@ onMounted(async () => {
             @click="funcAddWishList(item)">
             {{ item.setNum ? item.setNum : item.itemId }}
           </button>
+
           <div :style="`height: ${ loadPicture ? 320 : 5 }px; width: 400px;`" class="bg-gray-300">
             <img
               v-if="loadPicture"
-              loading="lazy"
+              loading="eager"
               style="height: 320px; width: 400px;"
               :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`"
               @click="getChildItem(item)"
@@ -358,7 +359,7 @@ onMounted(async () => {
     <div v-if="childItems.length > 1" tabindex="-1" aria-hidden="true" class="fixed top-0 z-50 justify-items-center w-full h-full">
       <div class="relative grid grid-cols-2 gap-2 overflow-auto rounded-lg shadow border-4 bg-gray-200 h-full" style="width: 80%;" v-on-click-outside="clearChildItem">
         <template v-for="(childitem, childindex) in childItems" :key="childindex">
-          <img loading="lazy" :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${childitem.filePath}`" />
+          <img loading="eager" :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${childitem.filePath}`" />
         </template>
       </div>
     </div>
@@ -366,7 +367,7 @@ onMounted(async () => {
     <div v-if="childItems.length === 1" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 z-50 justify-items-center w-full h-full">
       <img
         class="relative rounded-lg shadow border-4 bg-gray-200 h-full"
-        loading="lazy"
+        loading="eager"
         :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${childItems[0]?.filePath}`"
         v-on-click-outside="clearChildItem"
       />
