@@ -25,17 +25,6 @@ const funGetUsers = async () => {
       'access-control-expose-headers': 'Authorization,Content-Disposition,Content-Type',
       'authorization': `${params.value.authorization}`,
       'content-type': 'application/json',
-      'cookie': 'modalType=update; modalClosed=false;',
-      'dnt': '1',
-      'priority': 'u=1, i',
-      'referer': `https://studio.treed.ai/status?projectId=${params.value.projectId}&taskId=${params.value.taskId}`,
-      'sec-ch-ua': '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-      'sec-ch-ua-mobile': '?0',
-      'sec-ch-ua-platform': '"macOS"',
-      'sec-fetch-dest': 'empty',
-      'sec-fetch-mode': 'cors',
-      'sec-fetch-site': 'same-origin',
-      'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
     }
   })
   // error
@@ -63,17 +52,6 @@ const funGetTaskByUser = async (userIds?: Array<string>, status?: string): Promi
       'access-control-expose-headers': 'Authorization,Content-Disposition,Content-Type',
       'authorization': `${params.value.authorization}`,
       'content-type': 'application/json',
-      'cookie': `modalType=update; modalClosed=false;`,
-      'dnt': '1',
-      'priority': 'u=1, i',
-      'referer': `https://studio.treed.ai/workspace/${params.value.taskId}?workType=MANAGER`,
-      'sec-ch-ua': '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-      'sec-ch-ua-mobile': '?0',
-      'sec-ch-ua-platform': '"macOS"',
-      'sec-fetch-dest': 'empty',
-      'sec-fetch-mode': 'cors',
-      'sec-fetch-site': 'same-origin',
-      'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
     }
   })
   // error
@@ -94,18 +72,7 @@ const funcNextRequest = async () => {
         'access-control-allow-origin': '*',
         'access-control-expose-headers': 'Authorization,Content-Disposition,Content-Type',
         'authorization': `${params.value.authorization}`,
-        'cookie': 'modalType=update; modalClosed=false;',
-        'dnt': '1',
-        'origin': 'https://studio.treed.ai',
-        'priority': 'u=1, i',
-        'referer': `https://studio.treed.ai/workspace/${params.value.taskId}?workType=OPERATOR`,
-        'sec-ch-ua': '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"macOS"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+        'content-type': 'application/json',
       }
     }
   )
