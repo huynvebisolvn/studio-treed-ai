@@ -56,7 +56,13 @@ const funGetTaskByUser = async (userIds?: Array<string>, status?: string): Promi
   })
   // error
   if (response.data?.code?.includes("TK")) isError.value = true
-  return response.data.items
+  const items = response.data.items
+  if (items && items[0] && items[0].setNum) {
+    return items.sort(function (a, b) {
+      return (a.setNum ? a.setNum : Infinity) - (b.setNum ? b.setNum : Infinity)
+    })
+  }
+  return items
 }
 
 const funcNextRequest = async () => {
