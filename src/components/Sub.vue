@@ -118,10 +118,13 @@ const funGetParams = () => {
 
 const funTimer = (ms: number) => new Promise((res) => setTimeout(res, ms))
 
-const funGetUsersTask = async (userIds: Array<any>, myIds?: number) => {
+const funGetUsersTask = async (myIds?: number) => {
   while (true) {
     try {
       let originalTasks = await funGetPics('WORK_BEFORE')
+
+      const users = await funGetUsers()
+      const userIds = [...new Set(users.map((e: any) => e.id))]
 
       const tasks = await funGetTaskByUser(userIds)
 
@@ -169,8 +172,10 @@ const funGetUsersTask = async (userIds: Array<any>, myIds?: number) => {
           } 
         }
       }
-      await funTimer(2000)
-    } catch (error) { }
+      await funTimer(3000)
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 
@@ -272,20 +277,18 @@ onBeforeMount(() => {
 })
 
 onMounted(async () => {
-  // get first all user and task
-  const users = await funGetUsers()
   // show item in screen
   items.value = await funGetPics('WORK_BEFORE')
 
-  // get my task
-  const myUser = users.find((e: any) => e.name === params.value.user)
-  if (myUser) {
-    funGetMyTask(myUser.id)
+  // get my task first time
+  const users = await funGetUsers()
+  const myUserId = users.find((e: any) => e.name === params.value.user)?.id
+  if (myUserId) {
+    funGetMyTask(myUserId)
   }
 
   // loop for fetch task
-  const ids = [...new Set(users.map((e: any) => e.id))]
-  funGetUsersTask(ids, myUser.id)
+  funGetUsersTask(myUserId)
 })
 </script>
 
