@@ -121,10 +121,10 @@ const funTimer = (ms: number) => new Promise((res) => setTimeout(res, ms))
 const funGetUsersTask = async (myIds?: number) => {
   while (true) {
     try {
-      let originalTasks = await funGetPics('WORK_BEFORE')
-
       const users = await funGetUsers()
       const userIds = [...new Set(users.map((e: any) => e.id))]
+
+      let originalTasks = await funGetPics('WORK_BEFORE')
 
       const tasks = await funGetTaskByUser(userIds)
 
