@@ -67,7 +67,7 @@ const funGetTaskByUser = async (userIds?: Array<string>, status?: string): Promi
 
 const funcNextRequest = async () => {
   const response = await axios.post(
-    'https://studio.treed.ai/api/workspace/work/next',
+    'https://studio.treed.ai/api/workspace/work/next/allocate',
     {
       'taskId': `${params.value.taskId}`,
       'workType': 'OPERATOR'
