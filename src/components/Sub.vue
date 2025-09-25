@@ -14,6 +14,7 @@ const wishList: any = ref([])
 const wishListInput: any = ref('')
 const childItems: any = ref([])
 const myTaskList: any = ref([])
+const myUUID: any = ref('c6bf9860-649f-47e2-bf5e-b73febc895f4')
 const isError = ref(false)
 
 const funGetUsers = async () => {
@@ -57,6 +58,13 @@ const funGetTaskByUser = async (userIds?: Array<string>, status?: string): Promi
   // error
   if (response.data?.code?.includes("TK")) isError.value = true
   const items = response.data.items
+  // fix bug get new path
+  for (const item of items) {
+    const parts = item.fileName.split('_')
+    const date = parts[5]
+    const time = parts[6]
+    item.filePath = `https://treed-data-stable.s3.ap-northeast-2.amazonaws.com/AlcheraInc/${params.value.projectId}-${myUUID.value}/${date}_TreeD/${date}_${time}/${item.fileName}`
+  }
   if (items && items[0] && items[0].setNum) {
     return items.sort(function (a, b) {
       return (a.setNum ? a.setNum : Infinity) - (b.setNum ? b.setNum : Infinity)
@@ -182,6 +190,27 @@ const funGetUsersTask = async (myIds?: number) => {
 const funGetMyTask = async (userId: number) => {
   const tasks = await funGetTaskByUser([String(userId)])
   myTaskList.value = [...new Set(tasks.map((e: any) => e.setNum ? e.setNum : e.itemId))]
+  if (tasks && tasks[0]) {
+    const awsPath = await axios.get(`https://studio.treed.ai/api/workspace/item/${tasks[0].itemId}`, {
+      params: {
+        'workType': 'OPERATOR'
+      },
+      headers: {
+        'accept': 'application/json, text/plain, */*',
+        'accept-language': 'en-US,en;q=0.9,vi-VN;q=0.8,vi;q=0.7,fr-FR;q=0.6,fr;q=0.5',
+        'access-control-allow-origin': '*',
+        'access-control-expose-headers': 'Authorization,Content-Disposition,Content-Type',
+        'authorization': `${params.value.authorization}`,
+        'content-type': 'application/json',
+      }
+    })
+    const url = awsPath.data.payload.file.url
+    const cleanUrl = url.split('?')[0]
+    const pathParts = cleanUrl.split('/')
+    const fullId = pathParts[4] // 582-c6bf9860-649f-47e2-bf5e-b73febc895f4
+    const uuid = fullId.split('-').slice(1).join('-') // c6bf9860-649f-47e2-bf5e-b73febc895f4
+    myUUID.value = uuid
+  }
 }
 
 const funGetPics = async (status: string) => {
@@ -329,7 +358,7 @@ onMounted(async () => {
               :key="item.filePath"
               loading="eager"
               style="height: 320px; width: 400px;"
-              :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${item.filePath}`"
+              :src="`${item.filePath}`"
               @click="getChildItem(item)"
             />
           </div>
@@ -341,7 +370,7 @@ onMounted(async () => {
       <div class="relative overflow-auto rounded-lg shadow bg-gray-200 h-full" v-on-click-outside="clearChildItem">
         <div>Tổng cộng: {{ childItems.length }}</div>
         <div v-for="(childitem, childindex) in childItems" :key="childindex" class="mb-2">
-          <img loading="eager" :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${childitem.filePath}`" />
+          <img loading="eager" :src="`${childitem.filePath}`" />
         </div>
       </div>
     </div>
@@ -352,7 +381,7 @@ onMounted(async () => {
           class="relative rounded-lg shadow border-4 bg-gray-200 h-full"
           :key="childItems[0]?.filePath"
           loading="eager"
-          :src="`https://treed-data-stable.s3.ap-northeast-2.amazonaws.com${childItems[0]?.filePath}`"
+          :src="`${childItems[0]?.filePath}`"
           v-on-click-outside="clearChildItem"
         />
       </div>
