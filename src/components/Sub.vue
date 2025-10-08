@@ -14,7 +14,7 @@ const wishList: any = ref([])
 const wishListInput: any = ref('')
 const childItems: any = ref([])
 const myTaskList: any = ref([])
-const myUUID: any = ref('c6bf9860-649f-47e2-bf5e-b73febc895f4')
+const myUUID: any = ref('582-c6bf9860-649f-47e2-bf5e-b73febc895f4/20251006_Treed')
 const isError = ref(false)
 
 const funGetUsers = async () => {
@@ -63,7 +63,7 @@ const funGetTaskByUser = async (userIds?: Array<string>, status?: string): Promi
     const parts = item.fileName.split('_')
     const date = parts[5]
     const time = parts[6]
-    item.filePath = `https://treed-data-stable.s3.ap-northeast-2.amazonaws.com/AlcheraInc/${params.value.projectId}-${myUUID.value}/${date}_TreeD/${date}_${time}/${item.fileName}`
+    item.filePath = `https://treed-data-stable.s3.ap-northeast-2.amazonaws.com/AlcheraInc/${myUUID.value}/${date}_${time}/${item.fileName}`
   }
   if (items && items[0] && items[0].setNum) {
     return items.sort(function (a, b) {
@@ -207,9 +207,8 @@ const funGetMyTask = async (userId: number) => {
     const url = awsPath.data.payload.file.url
     const cleanUrl = url.split('?')[0]
     const pathParts = cleanUrl.split('/')
-    const fullId = pathParts[4] // 582-c6bf9860-649f-47e2-bf5e-b73febc895f4
-    const uuid = fullId.split('-').slice(1).join('-') // c6bf9860-649f-47e2-bf5e-b73febc895f4
-    myUUID.value = uuid
+    // 582-c6bf9860-649f-47e2-bf5e-b73febc895f4/20251006_Treed
+    myUUID.value = pathParts[4] + '/' + pathParts[5]
   }
 }
 
